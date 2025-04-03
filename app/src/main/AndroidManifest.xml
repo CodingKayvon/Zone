@@ -12,27 +12,33 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Zone"
         tools:targetApi="31">
+
         <activity
             android:name=".profile.ProfileActivity"
             android:exported="false" />
+
         <activity
             android:name=".login.SignUpActivity"
             android:exported="false" />
+
+        <!-- SignInActivity is now the main entry point -->
         <activity
             android:name=".login.SignInActivity"
-            android:exported="false" />
-        <activity
-            android:name=".chatroom.ChatRoomActivity"
-            android:exported="false" />
-        <activity
-            android:name=".home.HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".chatroom.ChatRoomActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".home.HomeActivity"
+            android:exported="false" /> <!-- Remove intent-filter from HomeActivity -->
+
     </application>
 
 </manifest>
