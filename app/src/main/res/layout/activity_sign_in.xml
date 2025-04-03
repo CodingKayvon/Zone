@@ -11,7 +11,7 @@
 
     <!-- Sign In Title -->
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/siTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Sign In"
@@ -24,7 +24,7 @@
 
     <!-- Sign In Greeting -->
     <TextView
-        android:id="@+id/greeting"
+        android:id="@+id/siGreeting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hi there! Nice to see you again."
@@ -32,12 +32,12 @@
         android:textColor="#666666"
         android:layout_marginTop="8dp"
         android:layout_marginStart="30dp"
-        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintTop_toBottomOf="@id/siTitle"
         app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Email Label -->
     <TextView
-        android:id="@+id/emailLabel"
+        android:id="@+id/siEmailLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Email"
@@ -45,16 +45,16 @@
         android:textColor="#FF5555"
         android:layout_marginTop="20dp"
         android:layout_marginStart="30dp"
-        app:layout_constraintTop_toBottomOf="@id/greeting"
+        app:layout_constraintTop_toBottomOf="@id/siGreeting"
         app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Email Input -->
     <EditText
-        android:id="@+id/emailInput"
+        android:id="@+id/siEmailInput"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:inputType="textEmailAddress"
-        app:layout_constraintTop_toBottomOf="@id/emailLabel"
+        app:layout_constraintTop_toBottomOf="@id/siEmailLabel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="30dp"
@@ -62,7 +62,7 @@
 
     <!-- Password Label -->
     <TextView
-        android:id="@+id/passwordLabel"
+        android:id="@+id/siPasswordLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Password"
@@ -70,16 +70,16 @@
         android:textColor="#FF5555"
         android:layout_marginTop="20dp"
         android:layout_marginStart="30dp"
-        app:layout_constraintTop_toBottomOf="@id/emailInput"
+        app:layout_constraintTop_toBottomOf="@id/siEmailInput"
         app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Password Input -->
     <EditText
-        android:id="@+id/passwordInput"
+        android:id="@+id/siPasswordInput"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
-        app:layout_constraintTop_toBottomOf="@id/passwordLabel"
+        app:layout_constraintTop_toBottomOf="@id/siPasswordLabel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="30dp"
@@ -87,7 +87,7 @@
 
     <!-- Sign In Button   -->
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/loginButton"
+        android:id="@+id/siLoginButton"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:text="Sign In"
@@ -97,13 +97,13 @@
         android:layout_marginStart="30dp"
         android:layout_marginEnd="30dp"
         android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/passwordInput"
+        app:layout_constraintTop_toBottomOf="@id/siPasswordInput"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Forgot Password Text -->
     <TextView
-        android:id="@+id/forgotPasswordLink"
+        android:id="@+id/siForgotPasswordLink"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Forgot Password?"
@@ -111,12 +111,12 @@
         android:textColor="#666666"
         android:layout_marginTop="30dp"
         android:layout_marginStart="30dp"
-        app:layout_constraintTop_toBottomOf="@id/loginButton"
+        app:layout_constraintTop_toBottomOf="@id/siLoginButton"
         app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Sign Up Text -->
     <TextView
-        android:id="@+id/signUpLink"
+        android:id="@+id/siSignUpLink"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Sign Up"
@@ -124,7 +124,7 @@
         android:textColor="#FF5555"
         android:layout_marginTop="30dp"
         android:layout_marginEnd="30dp"
-        app:layout_constraintTop_toBottomOf="@id/loginButton"
+        app:layout_constraintTop_toBottomOf="@id/siLoginButton"
         app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
