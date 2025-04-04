@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "181601718868",
+    "project_id": "zoneauth",
+    "storage_bucket": "zoneauth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181601718868:android:8ea78c36aca0ed72cad3c1",
+        "android_client_info": {
+          "package_name": "com.example.zone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCX1VSPaEGYUjA341I5O4PIRarjt2VPBYA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

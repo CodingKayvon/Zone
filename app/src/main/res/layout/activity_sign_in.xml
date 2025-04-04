@@ -116,7 +116,7 @@
 
     <!-- Sign Up Text -->
     <TextView
-        android:id="@+id/siSignUpLink"
+        android:id="@+id/siToSignUp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Sign Up"

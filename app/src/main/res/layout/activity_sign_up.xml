@@ -114,7 +114,7 @@
 
     <!-- Sign In Link -->
     <TextView
-        android:id="@+id/suSignUpLink"
+        android:id="@+id/suToSignIn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Sign In"
