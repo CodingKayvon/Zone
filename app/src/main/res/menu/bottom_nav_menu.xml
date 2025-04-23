@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/ic_eventMap"
+        android:title="Event Map"
+        android:icon="@drawable/event_icon">
+    </item>
+    <item
+        android:id="@+id/ic_chats"
+        android:title="Chats"
+        android:icon="@drawable/baseline_comment_24">
+    </item>
+    <item
+        android:id="@+id/ic_profile"
+        android:title="Profile"
+        android:icon="@drawable/profile_box">
+    </item>
+</menu>
