@@ -1,0 +1,9 @@
+<resources>
+
+    <!-- Theme for your delete account dialog -->
+    <style name="AlertDialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="android:textColorPrimary">#000000</item>
+        <item name="android:textColorSecondary">#666666</item>
+    </style>
+
+</resources>
