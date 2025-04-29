@@ -1,60 +1,57 @@
 package com.example.zone.home
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.*
+import androidx.fragment.app.Fragment
 import com.example.zone.R
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [friendfindingFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class friendfindingFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var searchView: SearchView
+    private lateinit var addFriendButton: Button
+    private lateinit var suggestedFriendsList: LinearLayout
+    private lateinit var addedFriendsList: LinearLayout
+
+    private val suggestedFriends = listOf("bot1", "bot2", "bot3", "bot4", "bot5")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_friendfinding, container, false)
+        val view = inflater.inflate(R.layout.fragment_friendfinding, container, false)
+
+        searchView = view.findViewById(R.id.searchView)
+        addFriendButton = view.findViewById(R.id.addFriendButton)
+        suggestedFriendsList = view.findViewById(R.id.suggestedFriendsList)
+        addedFriendsList = view.findViewById(R.id.addedFriendsList)
+
+        loadSuggestedFriends()
+        // addedFriendsList stays blank for now
+
+        addFriendButton.setOnClickListener {
+            val searchText = searchView.query.toString().trim()
+            if (searchText.isNotEmpty()) {
+                Toast.makeText(requireContext(), "Friend request sent to $searchText!", Toast.LENGTH_SHORT).show()
+                searchView.setQuery("", false) // Clear after adding
+            } else {
+                Toast.makeText(requireContext(), "Please search a username first!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        return view
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment friendfindingFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            friendfindingFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    private fun loadSuggestedFriends() {
+        for (friendName in suggestedFriends) {
+            val textView = TextView(requireContext()).apply {
+                text = friendName
+                textSize = 18f
+                setPadding(0, 8, 0, 8)
             }
+            suggestedFriendsList.addView(textView)
+        }
     }
 }
