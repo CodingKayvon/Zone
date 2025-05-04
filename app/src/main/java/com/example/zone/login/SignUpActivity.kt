@@ -63,10 +63,20 @@ class SignUpActivity : AppCompatActivity() {
                     val user: MutableMap<String, Any> = HashMap()
                     user["email"] = email
                     user["Password"] = password
+                    Toast.makeText(this, "Sign-up Successful", Toast.LENGTH_SHORT).show()
+
+                    val userdata: MutableMap<String, Any> = HashMap()
+                    val username = email.substring(0, email.indexOf('@'))
+                    userdata["username"] = username
+                    userdata["uid"] = userId
+                    userdata["description"] = "I'm a new user!"
+                    userdata["status"] = "offline"
+                    userdata["profile"] =""
 
                     db.collection("users").document(userId)
-                        .set(user)
+                        .set(userdata)
                         .addOnSuccessListener {
+
                             Log.d("dbFirebase", "User data saved for ID: ${userId}")
                             Toast.makeText(this, "Sign-up Successful", Toast.LENGTH_SHORT).show()
                         }
