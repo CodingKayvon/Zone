@@ -27,7 +27,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <SearchView
+        <EditText
             android:id="@+id/searchView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

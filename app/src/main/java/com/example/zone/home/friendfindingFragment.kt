@@ -25,7 +25,7 @@ class friendfindingFragment : Fragment() {
 
     private val suggestedFriends = listOf("bot1", "bot2", "bot3", "bot4", "bot5")
     private var userAdapter: UserAdapter? = null
-    private val mUsers: List<Users>? = null
+    private var mUsers: List<Users>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,6 +36,8 @@ class friendfindingFragment : Fragment() {
 
         mUsers = ArrayList()
         retrieveAllUsers()
+
+        
         /*
         val view = inflater.inflate(R.layout.fragment_friendfinding, container, false)
 
