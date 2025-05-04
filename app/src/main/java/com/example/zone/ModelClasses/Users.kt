@@ -20,5 +20,45 @@ class Users {
         this.status = status
         this.description = description
     }
+
+    fun getUID(): String?{
+        return uid
+    }
+
+    fun setUID(uid: String){
+        this.uid = uid
+    }
+
+    fun getUserName(): String? {
+        return username
+    }
+
+    fun setUserName(username: String){
+        this.username = username
+    }
+
+    fun getProfile(): String?{
+        return profile
+    }
+
+    fun setProfile(profile: String){
+        this.profile = profile
+    }
+
+    fun getStatus(): String?{
+        return status
+    }
+
+    fun setStatus(status: String){
+        this.status = status
+    }
+
+    fun getDescription(): String?{
+        return description
+    }
+
+    fun setDescription(description: String){
+        this.description = description
+    }
 }
 
