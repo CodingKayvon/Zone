@@ -1,0 +1,53 @@
+package com.example.zone.AdapterClasses
+
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.example.zone.ModelClasses.Users
+import com.example.zone.R
+import com.squareup.picasso.Picasso
+
+class UserAdapter(
+    mContext: Context,
+    mUsers: List<Users>,
+    isChatCheck: Boolean): RecyclerView.Adapter<UserAdapter.ViewHolder?>()
+{
+        private val mContext:Context
+        private val mUsers: List<Users>
+        private var isChatCheck: Boolean
+
+        init {
+            this.mUsers = mUsers
+            this.mContext = mContext
+            this.isChatCheck = isChatCheck
+        }
+
+        override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
+            val view:View = LayoutInflater.from(mContext).inflate(R.layout.fragment_friendfinding, viewGroup, false)
+            return UserAdapter.ViewHolder(view)
+        }
+        override fun getItemCount(): Int {
+            return mUsers.size
+        }
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val user: Users = mUsers[position]
+            holder.userNameTxt.text = user!!.getUserName()
+            Picasso.get().load(user.getProfile()).placeholder(R.drawable.profile_circle).into(holder.profileImageView)
+        }
+
+
+        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+        {
+            var userNameTxt: TextView
+            var profileImageView: ImageView
+
+            init {
+                userNameTxt = itemView.findViewById(R.id.profileTitle)
+                profileImageView = itemView.findViewById(R.id.profileImage)
+            }
+        }
+}
