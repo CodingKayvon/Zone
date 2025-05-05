@@ -27,7 +27,7 @@
             </ImageView>
 
             <TextView
-                android:id="@+id/username_mchat"
+                android:id="@+id/username_mc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
@@ -59,7 +59,7 @@
         android:layout_alignParentBottom="true"
         >
         <Button
-            android:id="@+id/attatch_image_file"
+            android:id="@+id/attatch_image_file_btn"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_alignParentStart="true"
@@ -70,7 +70,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
-            android:layout_toRightOf="@+id/attatch_image_file"
+            android:layout_toRightOf="@+id/attatch_image_file_btn"
             android:layout_toLeftOf="@+id/send_message_button"
             android:padding="16dp"
             android:layout_marginLeft="6dp"

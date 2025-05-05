@@ -1,14 +1,19 @@
 package com.example.zone.AdapterClasses
 
 import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.zone.ModelClasses.Users
 import com.example.zone.R
+import com.example.zone.chatroom.ChatRoomActivity
 import com.squareup.picasso.Picasso
 
 class UserAdapter(
@@ -36,7 +41,29 @@ class UserAdapter(
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val user: Users = mUsers[position]
             holder.userNameTxt.text = user!!.getUserName()
-            Picasso.get().load(user.getProfile()).placeholder(R.drawable.profile_circle).into(holder.profileImageView)
+            Picasso.get().load(user.getProfile()).placeholder(R.drawable.ic_profile_placeholder_foreground).into(holder.profileImageView)
+
+            holder.itemView.setOnClickListener {
+                val options = arrayOf<CharSequence>(
+                    "Send Message",
+                    "Visit Profile"
+                )
+                val builder: AlertDialog.Builder = AlertDialog.Builder(mContext)
+                builder.setTitle("What do you want?")
+                builder.setItems(options, DialogInterface.OnClickListener{dialog, which ->
+                    if (which == 0)
+                    {
+                        val intent = Intent(mContext, ChatRoomActivity::class.java)
+                        intent.putExtra("visit_id", user.getUID())
+                        mContext.startActivity(intent)
+                    }
+                    if (which == 1)
+                    {
+
+                    }
+                })
+                builder.show()
+            }
         }
 
 

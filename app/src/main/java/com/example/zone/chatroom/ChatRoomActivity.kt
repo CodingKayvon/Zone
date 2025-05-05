@@ -1,8 +1,14 @@
 package com.example.zone.chatroom
 
+import android.app.Activity
+import android.app.ProgressDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +21,7 @@ import com.example.zone.ModelClasses.Chat
 import com.example.zone.ModelClasses.Users
 import com.example.zone.R
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -24,10 +31,15 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageTask
+import com.google.firebase.storage.UploadTask
 import com.google.firestore.v1.Value
+import com.squareup.picasso.Picasso
+import kotlin.coroutines.Continuation
 
 class ChatRoomActivity : AppCompatActivity() {
-    var userIdVisit: String? = ""
+    var userIdVisit: String = ""
     var firebaseUser: FirebaseUser? = null
     var chatsAdapter: ChatsAdapter? = null
     var mChatList: List<Chat>? = null
@@ -39,7 +51,7 @@ class ChatRoomActivity : AppCompatActivity() {
         setContentView(R.layout.activity_chat_room)
 
         intent = intent
-        userIdVisit = intent.getStringExtra("visit_id")
+        userIdVisit = intent.getStringExtra("visit_id")!!
         firebaseUser =  FirebaseAuth.getInstance().currentUser
 
         recycler_view_chats = findViewById(R.id.recycler_view_chats)
@@ -49,15 +61,16 @@ class ChatRoomActivity : AppCompatActivity() {
         recycler_view_chats.layoutManager = linearLayoutManager
 
         val reference = FirebaseDatabase.getInstance().reference
-            .child("users").child(userIdVisit)
+            .child("users").child(userIdVisit!!)
         reference.addValueEventListener(object : ValueEventListener{
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val user: Users? = snapshot.getValue(Users::class.java)
+            override fun onDataChange(p0: DataSnapshot) {
+                val user: Users? = p0.getValue(Users::class.java)
 
-                //username_mchat.text = user!!.getUserName()
-                //Picasso.get().load(user.getProfile()).into(profile_image_mchat)
+                findViewById<TextView>(R.id.username_mc).text = user!!.getUserName()
+                val profile_pic = findViewById<ImageView>(R.id.profile_image_mc)
+                Picasso.get().load(user.getProfile()).into(profile_pic)
 
-                retriveMessages(firebaseUser!!.uid, userIdVisit, user.getProfile())
+                retriveMessages(firebaseUser!!.uid, userIdVisit, user!!.getProfile())
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -76,11 +89,19 @@ class ChatRoomActivity : AppCompatActivity() {
         sendButton.setOnClickListener() {
             val message = textBox.text.toString()
             if (message =="") {
-                print("no message")
+                Toast.makeText(this@ChatRoomActivity, "Please write a message first...", Toast.LENGTH_LONG).show()
             }
             else {
                 sendMessageToUser(firebaseUser!!.uid, userIdVisit, message)
             }
+            textBox.setText("")
+        }
+        val attatch_image_file_btn = findViewById<Button>(R.id.attatch_image_file_btn)
+        attatch_image_file_btn.setOnClickListener {
+            val intent = Intent()
+            intent.action = Intent.ACTION_GET_CONTENT
+            intent.type = "image/"
+            startActivityForResult(Intent.createChooser(intent,"Pick Image"), 438)
         }
     }
 
@@ -91,17 +112,14 @@ class ChatRoomActivity : AppCompatActivity() {
         val reference = FirebaseDatabase.getInstance().reference
         val messageKey = reference.push().key
 
-        val downloadUrl = task.result
-        val url = downloadUrl.toString()
-
         val messageHashMap = HashMap<String, Any?>()
         messageHashMap["sender"] = senderId
         messageHashMap["message"] = message
         messageHashMap["receiver"] = receiverId
         messageHashMap["isseen"] = false
-        messageHashMap["url"] = url
+        messageHashMap["url"] = ""
         messageHashMap["messageId"] = messageKey
-        reference.child("Chats")
+        reference.child("chats")
             .child(messageKey!!)
             .setValue(messageHashMap)
             .addOnCompleteListener {task ->
@@ -109,11 +127,32 @@ class ChatRoomActivity : AppCompatActivity() {
                 {
                     val chatListReference = FirebaseDatabase.getInstance()
                         .reference
-                        .child("ChatList")
+                        .child("chatlist")
+                        .child(firebaseUser!!.uid)
+                        .child(userIdVisit)
+                    chatListReference.addListenerForSingleValueEvent(object: ValueEventListener{
+                        override fun onDataChange(p0: DataSnapshot) {
+                            if (!p0.exists())
+                            {
+                                chatListReference.child("id").setValue(userIdVisit)
+                            }
+                            val chatListRecieverReference = FirebaseDatabase.getInstance()
+                                .reference
+                                .child("chatlist")
+                                .child(userIdVisit)
+                                .child(firebaseUser!!.uid)
+                            chatListRecieverReference.child("id").setValue(firebaseUser!!.uid)
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            TODO("Not yet implemented")
+                        }
+                    })
                     chatListReference.child("id").setValue(firebaseUser!!.uid)
 
-                    val reference = FirebaseDatabase.getInstance().reference
-                        .child("Users").child(firebaseUser!!.uid)
+
+
+                    //add notifs
                 }
             }
     }
@@ -136,11 +175,58 @@ class ChatRoomActivity : AppCompatActivity() {
                     }
                 }
                 chatsAdapter = ChatsAdapter(this@ChatRoomActivity, (mChatList as ArrayList<Chat>), profile!!)
+                recycler_view_chats.adapter = chatsAdapter
             }
 
             override fun onCancelled(error: DatabaseError) {
                 TODO("Not yet implemented")
             }
         })
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 438 && resultCode == RESULT_OK && data!=null && data!!.data!=null)
+        {
+            val loadingBar = ProgressDialog(this)
+            loadingBar.setMessage("Please wait, image is sending...")
+            loadingBar.show()
+
+            val fileUri = data.data
+            val storageReference = FirebaseStorage.getInstance().reference.child("Chat Images")
+            val ref = FirebaseDatabase.getInstance().reference
+            val messageId = ref.push().key
+            val filePath = storageReference.child("$messageId.jpg")
+
+            var uploadTask: StorageTask<*>
+            uploadTask = storageReference.putFile(fileUri!!)
+
+            uploadTask.continueWithTask<Uri?>(com.google.android.gms.tasks.Continuation <UploadTask.TaskSnapshot, Task<Uri>>{ task ->
+                if (!task.isSuccessful)
+                {
+                    task.exception?.let {
+                        throw it
+                    }
+                }
+                return@Continuation filePath.downloadUrl
+            }).addOnCompleteListener {task ->
+                if (task.isSuccessful)
+                {
+                    val downloadUrl = task.result
+                    val url = downloadUrl.toString()
+
+                    val messageHashMap = HashMap<String, Any?>()
+                    messageHashMap["sender"] = firebaseUser!!.uid
+                    messageHashMap["message"] = "sent you an image."
+                    messageHashMap["receiver"] = userIdVisit
+                    messageHashMap["isseen"] = false
+                    messageHashMap["url"] = url
+                    messageHashMap["messageId"] = messageId
+
+                    ref.child("chats").child(messageId!!).setValue(messageHashMap)
+                }
+            }
+
+        }
     }
 }
