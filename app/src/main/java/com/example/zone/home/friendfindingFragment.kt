@@ -37,6 +37,9 @@ class friendfindingFragment : Fragment() {
         mUsers = ArrayList()
         retrieveAllUsers()
 
+        //add functionality to the button when you get the chance, i left some working functions for it
+
+
 
         /*
         val view = inflater.inflate(R.layout.fragment_friendfinding, container, false)
@@ -50,7 +53,7 @@ class friendfindingFragment : Fragment() {
 
          */
         // addedFriendsList stays blank for now
-
+/*
         addFriendButton.setOnClickListener {
             val searchText = searchView.query.toString().trim()
             if (searchText.isNotEmpty()) {
@@ -60,7 +63,7 @@ class friendfindingFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please search a username first!", Toast.LENGTH_SHORT).show()
             }
         }
-
+*/
         return view
     }
 

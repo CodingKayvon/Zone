@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,12 +21,14 @@ import com.example.zone.AdapterClasses.ChatsAdapter
 import com.example.zone.ModelClasses.Chat
 import com.example.zone.ModelClasses.Users
 import com.example.zone.R
+import com.example.zone.home.HomeActivity
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
@@ -44,11 +47,24 @@ class ChatRoomActivity : AppCompatActivity() {
     var chatsAdapter: ChatsAdapter? = null
     var mChatList: List<Chat>? = null
     lateinit var recycler_view_chats: RecyclerView
+    var reference: DatabaseReference? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_chat_room)
+
+        val toolbar: Toolbar = findViewById(R.id.toolbar_message_chat)
+        setSupportActionBar(toolbar)
+
+        supportActionBar!!.title = ""
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        toolbar.setNavigationOnClickListener{
+            val intent = Intent(this@ChatRoomActivity, HomeActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+            finish()
+        }
 
         intent = intent
         userIdVisit = intent.getStringExtra("visit_id")!!
@@ -60,9 +76,9 @@ class ChatRoomActivity : AppCompatActivity() {
         linearLayoutManager.stackFromEnd = true
         recycler_view_chats.layoutManager = linearLayoutManager
 
-        val reference = FirebaseDatabase.getInstance().reference
+        reference = FirebaseDatabase.getInstance().reference
             .child("users").child(userIdVisit!!)
-        reference.addValueEventListener(object : ValueEventListener{
+        reference!!.addValueEventListener(object : ValueEventListener{
             override fun onDataChange(p0: DataSnapshot) {
                 val user: Users? = p0.getValue(Users::class.java)
 
@@ -103,6 +119,8 @@ class ChatRoomActivity : AppCompatActivity() {
             intent.type = "image/"
             startActivityForResult(Intent.createChooser(intent,"Pick Image"), 438)
         }
+
+        seenMessage(userIdVisit)
     }
 
     /**************************************************************************************
@@ -228,5 +246,33 @@ class ChatRoomActivity : AppCompatActivity() {
             }
 
         }
+    }
+    var seenListener: ValueEventListener? = null
+    private fun seenMessage(userId: String)
+    {
+        val reference = FirebaseDatabase.getInstance().reference.child("chats")
+        seenListener = reference!!.addValueEventListener(object: ValueEventListener{
+            override fun onDataChange(p0: DataSnapshot) {
+                for (dataSnapshot in p0.children){
+                    val chat = dataSnapshot.getValue(Chat::class.java)
+
+                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && chat!!.getSender().equals(userId))
+                    {
+                        val hashMap = HashMap<String, Any>()
+                        hashMap["isseen"] = true
+                        dataSnapshot.ref.updateChildren(hashMap)
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+        reference!!.removeEventListener(seenListener!!)
     }
 }
