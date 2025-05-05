@@ -110,7 +110,7 @@ class ChatsAdapter(
                 {
                     val lp: RelativeLayout.LayoutParams? = holder.text_seen!!.layoutParams as RelativeLayout.LayoutParams?
                     lp!!.setMargins(0, 245, 10,0)
-                    holder.text_seen!!.layout.layoutParams = lp
+                    holder.text_seen!!.layoutParams = lp
                 }
             }
             else
@@ -120,7 +120,7 @@ class ChatsAdapter(
                 {
                     val lp: RelativeLayout.LayoutParams? = holder.text_seen!!.layoutParams as RelativeLayout.LayoutParams?
                     lp!!.setMargins(0, 245, 10,0)
-                    holder.text_seen!!.layout.layoutParams = lp
+                    holder.text_seen!!.layoutParams = lp
                 }
             }
         }
