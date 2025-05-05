@@ -37,7 +37,7 @@ class friendfindingFragment : Fragment() {
         mUsers = ArrayList()
         retrieveAllUsers()
 
-        
+
         /*
         val view = inflater.inflate(R.layout.fragment_friendfinding, container, false)
 

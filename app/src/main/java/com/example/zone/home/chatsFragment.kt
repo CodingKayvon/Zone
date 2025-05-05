@@ -5,10 +5,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.zone.AdapterClasses.UserAdapter
 import com.example.zone.ModelClasses.Users
 import com.example.zone.R
 
 class chatsFragment : Fragment() {
+    private var userAdapter: UserAdapter? = null
+    private var mUsers: List<Users>? = null
+    private var usersChatList: List<ChatList>? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
