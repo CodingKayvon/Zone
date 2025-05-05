@@ -31,7 +31,7 @@ class ChatRoomActivity : AppCompatActivity() {
     var firebaseUser: FirebaseUser? = null
     var chatsAdapter: ChatsAdapter? = null
     var mChatList: List<Chat>? = null
-    lateinit var recyclerView: RecyclerView
+    lateinit var recycler_view_chats: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,11 +42,11 @@ class ChatRoomActivity : AppCompatActivity() {
         userIdVisit = intent.getStringExtra("visit_id")
         firebaseUser =  FirebaseAuth.getInstance().currentUser
 
-        recyclerView = findViewById(R.id.recyclerView)
-        recyclerView.setHasFixedSize(true)
-        var linearLayoutManager = LinearLayoutManager(applicationContext)
+        recycler_view_chats = findViewById(R.id.recycler_view_chats)
+        recycler_view_chats.setHasFixedSize(true)
+        val linearLayoutManager = LinearLayoutManager(applicationContext)
         linearLayoutManager.stackFromEnd = true
-        recyclerView.layoutManager = linearLayoutManager
+        recycler_view_chats.layoutManager = linearLayoutManager
 
         val reference = FirebaseDatabase.getInstance().reference
             .child("users").child(userIdVisit)
@@ -70,8 +70,8 @@ class ChatRoomActivity : AppCompatActivity() {
             insets
         }
 
-        val sendButton = findViewById<Button>(R.id.sendButton)
-        val textBox = findViewById<EditText>(R.id.textMessage)
+        val sendButton = findViewById<Button>(R.id.send_message_button)
+        val textBox = findViewById<EditText>(R.id.text_message)
 
         sendButton.setOnClickListener() {
             val message = textBox.text.toString()
@@ -120,7 +120,7 @@ class ChatRoomActivity : AppCompatActivity() {
     private fun retriveMessages(senderId: String, receiverId: String?, profile: String?)
     {
         mChatList = ArrayList()
-        val reference = FirebaseDatabase.getInstance.reference.child("chats")
+        val reference = FirebaseDatabase.getInstance().reference.child("chats")
 
         reference.addValueEventListener(object : ValueEventListener{
             override fun onDataChange(p0: DataSnapshot) {
