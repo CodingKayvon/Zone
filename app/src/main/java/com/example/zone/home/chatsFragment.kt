@@ -99,7 +99,7 @@ class chatsFragment : Fragment() {
                         }
                     }
                 }
-                adapter = ChatsAdapter(requireContext(), mUsers)
+                //adapter = ChatsAdapter(requireContext(), mUsers)
                 recyclerView.adapter = adapter
             }
 
