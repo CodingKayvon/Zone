@@ -18,7 +18,7 @@
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_chat_list"
+        android:id="@+id/recylerViewChats"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
