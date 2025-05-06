@@ -1,6 +1,8 @@
 package com.example.zone.home
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,13 +17,18 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import androidx.core.widget.addTextChangedListener
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+
 
 class friendfindingFragment : Fragment() {
 
-    private lateinit var searchView: SearchView
     private lateinit var addFriendButton: Button
     private lateinit var suggestedFriendsList: LinearLayout
     private lateinit var addedFriendsList: LinearLayout
+    private var searchEditText: EditText? = null
+    private var recyclerView: RecyclerView? = null
 
     private val suggestedFriends = listOf("bot1", "bot2", "bot3", "bot4", "bot5")
     private var userAdapter: UserAdapter? = null
@@ -34,9 +41,31 @@ class friendfindingFragment : Fragment() {
 
         val view: View = inflater.inflate(R.layout.fragment_friendfinding, container, false)
 
+
+
+        recyclerView = view.findViewById(R.id.searchList)
+        recyclerView!!.setHasFixedSize(true)
+        recyclerView!!.layoutManager = LinearLayoutManager(context)
+
         mUsers = ArrayList()
         retrieveAllUsers()
 
+        searchEditText = view.findViewById<EditText>(R.id.searchUsers)
+
+        searchEditText!!.addTextChangedListener(object : TextWatcher
+        {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(cs: CharSequence?, start: Int, before: Int, count: Int) {
+                searchForUsers(cs.toString().lowercase())
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+        })
         //add functionality to the button when you get the chance, i left some working functions for it
 
 
@@ -69,18 +98,22 @@ class friendfindingFragment : Fragment() {
 
     private fun retrieveAllUsers() {
         var firebaseUserID = FirebaseAuth.getInstance().currentUser!!.uid
-        val refUsers = FirebaseDatabase.getInstance().reference.child("users")
+        val refUsers = FirebaseDatabase.getInstance().reference.child("users").child(firebaseUserID)
 
         refUsers.addValueEventListener(object: ValueEventListener {
             override fun onDataChange(p0: DataSnapshot) {
                 (mUsers as ArrayList<Users>).clear()
-                for (snapshot in p0.children) {
-                    val user: Users? = p0.getValue(Users::class.java)
-                    if (!(user!!.getUID()).equals(firebaseUserID)) {
-                        (mUsers as ArrayList<Users>).add(user)
+                if(searchEditText!!.text.toString() == "")
+                {
+                    for (snapshot in p0.children) {
+                        val user: Users? = snapshot.getValue(Users::class.java)
+                        if (!(user!!.getUID()).equals(firebaseUserID)) {
+                            (mUsers as ArrayList<Users>).add(user)
+                        }
                     }
+                    userAdapter = UserAdapter(context!!, mUsers!!, false)
+                    recyclerView!!.adapter = userAdapter
                 }
-                userAdapter = UserAdapter(context!!, mUsers!!, false)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -99,15 +132,17 @@ class friendfindingFragment : Fragment() {
             override fun onDataChange(p0: DataSnapshot) {
                 (mUsers as ArrayList<Users>).clear()
                 for (snapshot in p0.children) {
-                    val user: Users? = p0.getValue(Users::class.java)
+                    val user: Users? = snapshot.getValue(Users::class.java)
                     if (!(user!!.getUID()).equals(firebaseUserID)) {
                         (mUsers as ArrayList<Users>).add(user)
                     }
                 }
+                userAdapter = UserAdapter(context!!, mUsers!!, false)
+                recyclerView!!.adapter = userAdapter
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+
             }
         })
 

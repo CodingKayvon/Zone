@@ -2,6 +2,7 @@ package com.example.zone.home
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,28 +41,39 @@ class profileFragment : Fragment() {
         // Load existing profile info
         uid?.let {
             database.child("users").child(it).get().addOnSuccessListener { snapshot ->
-                displayNameInput.setText(snapshot.child("displayName").value?.toString() ?: "")
-                aboutMeInput.setText(snapshot.child("aboutMe").value?.toString() ?: "")
+                displayNameInput.setText(snapshot.child("username").value?.toString() ?: "")
+                aboutMeInput.setText(snapshot.child("description").value?.toString() ?: "")
             }
         }
 
         // Save changes
         saveButton.setOnClickListener {
+            Toast.makeText(requireContext(), "Attempting to save.", Toast.LENGTH_SHORT).show()
+
+
             val displayName = displayNameInput.text.toString().trim()
             val aboutMe = aboutMeInput.text.toString().trim()
 
             if (uid != null) {
                 val updates = mapOf(
-                    "displayName" to displayName,
-                    "aboutMe" to aboutMe
+                    "username" to displayName,
+                    "description" to aboutMe
                 )
                 database.child("users").child(uid).updateChildren(updates)
                     .addOnSuccessListener {
                         Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
                     }
+                    .addOnFailureListener { exception ->
+                        Log.e("ProfileUpdateError", "Error updating profile: ${exception.message}")
+                        Toast.makeText(requireContext(), "Failed to save: ${exception.message}", Toast.LENGTH_LONG).show()
+                    }
+
                     .addOnFailureListener {
                         Toast.makeText(requireContext(), "Failed to save: ${it.message}", Toast.LENGTH_LONG).show()
                     }
+
+            }else{
+                Toast.makeText(requireContext(), "User ID is null", Toast.LENGTH_SHORT).show()
             }
         }
 
