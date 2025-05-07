@@ -32,7 +32,7 @@ class UserAdapter(
         }
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
-            val view:View = LayoutInflater.from(mContext).inflate(R.layout.fragment_friendfinding, viewGroup, false)
+            val view:View = LayoutInflater.from(mContext).inflate(R.layout.user_search_item_layout, viewGroup, false)
             return UserAdapter.ViewHolder(view)
         }
         override fun getItemCount(): Int {
@@ -71,10 +71,16 @@ class UserAdapter(
         {
             var userNameTxt: TextView
             var profileImageView: ImageView
+            var onlineTxt: ImageView
+            var offlineTxt: ImageView
+            var lastMessageTxt: TextView
 
             init {
                 userNameTxt = itemView.findViewById(R.id.profileTitle)
                 profileImageView = itemView.findViewById(R.id.profileImage)
+                onlineTxt = itemView.findViewById(R.id.image_online)
+                offlineTxt = itemView.findViewById(R.id.image_offline)
+                lastMessageTxt = itemView.findViewById(R.id.message_last)
             }
         }
 }

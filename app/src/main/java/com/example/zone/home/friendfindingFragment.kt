@@ -17,13 +17,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
 class friendfindingFragment : Fragment() {
-
-    private lateinit var searchView: SearchView
-    private lateinit var addFriendButton: Button
-    private lateinit var suggestedFriendsList: LinearLayout
-    private lateinit var addedFriendsList: LinearLayout
-
-    private val suggestedFriends = listOf("bot1", "bot2", "bot3", "bot4", "bot5")
     private var userAdapter: UserAdapter? = null
     private var mUsers: List<Users>? = null
 
@@ -37,6 +30,7 @@ class friendfindingFragment : Fragment() {
         mUsers = ArrayList()
         retrieveAllUsers()
 
+        return view
         //add functionality to the button when you get the chance, i left some working functions for it
 
 
@@ -63,8 +57,8 @@ class friendfindingFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please search a username first!", Toast.LENGTH_SHORT).show()
             }
         }
-*/
-        return view
+
+ */
     }
 
     private fun retrieveAllUsers() {
@@ -92,6 +86,14 @@ class friendfindingFragment : Fragment() {
     private fun searchForUsers(str: String) {
         var firebaseUserID = FirebaseAuth.getInstance().currentUser!!.uid
         val queryUsers = FirebaseDatabase.getInstance().reference
+            .child("users").orderByChild("search")
+            .startAt(str)
+            .endAt(str + "\uf8ff")
+
+        queryUsers.addValueEventListener(object:ValueEventListener)
+
+        /*
+        val queryUsers = FirebaseDatabase.getInstance().reference
             .child("users").orderByChild("username")
             .startAt(str)
             .endAt(str + "\uf8ff")
@@ -110,9 +112,11 @@ class friendfindingFragment : Fragment() {
                 TODO("Not yet implemented")
             }
         })
+        */
+
 
     }
-
+/*
     private fun loadSuggestedFriends() {
         for (friendName in suggestedFriends) {
             val textView = TextView(requireContext()).apply {
@@ -123,4 +127,6 @@ class friendfindingFragment : Fragment() {
             suggestedFriendsList.addView(textView)
         }
     }
+
+ */
 }
