@@ -1,6 +1,6 @@
 package com.example.zone.ModelClasses
 
-class Chatlist(private var id: String? = "") {
+data class Chatlist(private var id: String? = "") {
 
     fun getId(): String {
         return id!!

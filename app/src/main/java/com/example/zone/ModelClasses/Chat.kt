@@ -1,6 +1,6 @@
 package com.example.zone.ModelClasses
 
-class Chat(
+data class Chat(
     private var sender: String? = "",
     private var message: String? = "",
     private var receiver: String? = "",
