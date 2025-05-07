@@ -17,7 +17,6 @@ import com.squareup.picasso.Picasso
 class ChatsAdapter(
     private val mContext: Context,
     private val mChatList: List<Chat>,
-    private val chatside: String
 ): RecyclerView.Adapter<ChatsAdapter.ViewHolder>() {
 
 
@@ -51,7 +50,7 @@ class ChatsAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return if (chatside == "right")
+        return if (viewType == 1)
         {
             Log.d("View Holder", "SENDER")
             val view: View = LayoutInflater.from(mContext).inflate(R.layout.message_item_right, parent, false)

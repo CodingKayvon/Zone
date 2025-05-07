@@ -193,15 +193,13 @@ class ChatRoomActivity : AppCompatActivity() {
                     if (chat.receiver.equals(senderId) && chat.sender.equals(receiverId))
                     {
                         (mChatList as ArrayList<Chat>).add(chat)
-                        chatside = "left"
                     }
                     else if (chat.receiver.equals(receiverId) && chat.sender.equals(senderId))
                     {
                         (mChatList as ArrayList<Chat>).add(chat)
-                        chatside = "right"
                     }
                 }
-                chatsAdapter = ChatsAdapter(this@ChatRoomActivity, mChatList!!, chatside)
+                chatsAdapter = ChatsAdapter(this@ChatRoomActivity, mChatList!!)
                 recycler_view_chats.adapter = chatsAdapter
             }
         seenMessage(userIdVisit)
