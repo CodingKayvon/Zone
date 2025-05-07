@@ -33,7 +33,9 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
@@ -150,6 +152,7 @@ class ChatRoomActivity : AppCompatActivity() {
         messageHashMap["isseen"] = false
         messageHashMap["url"] = ""
         messageHashMap["messageId"] = "-1"
+        messageHashMap["createdAt"] = FieldValue.serverTimestamp()
         referenceFirestore.collection("chats")
             .add(messageHashMap)
             .addOnSuccessListener { document ->
@@ -165,30 +168,30 @@ class ChatRoomActivity : AppCompatActivity() {
                         for (snapshot in documents)
                         {
                             val chatListItem = snapshot.toObject<Chatlist>()
-                            if (chatListItem.sender == senderId && chatListItem.receiver == receiverId)
+                            if (chatListItem.sender == senderId && chatListItem.receiver == receiverId || chatListItem.receiver == senderId && chatListItem.sender == receiverId)
                             {
                                 chatFound = true
                             }
                         }
+                        if (!chatFound)
+                        {
+                            chatlistHash["receiver"] = receiverId
+                            chatlistHash["sender"] = senderId
+                            chatListReference
+                                .collection("chatlist")
+                                .document()
+                                .set(chatlistHash)
+
+                            //Create chatlist for receiver if it doesnt already exist
+                            chatlistHash["receiver"] = senderId
+                            chatlistHash["sender"] = receiverId
+                            chatListReference
+                                .collection("chatlist")
+                                .document(receiverId)
+                                .set(chatlistHash)
+
+                        }
                     }
-                if (!chatFound)
-                {
-                    chatlistHash["receiver"] = receiverId
-                    chatlistHash["sender"] = senderId
-                    chatListReference
-                        .collection("chatlist")
-                        .document()
-                        .set(chatlistHash)
-
-                    //Create chatlist for receiver if it doesnt already exist
-                    chatlistHash["receiver"] = senderId
-                    chatlistHash["sender"] = receiverId
-                    chatListReference
-                        .collection("chatlist")
-                        .document(receiverId)
-                        .set(chatlistHash)
-
-                }
 
                 messageHashMap["messageId"] = document.id
                 referenceFirestore
@@ -204,11 +207,11 @@ class ChatRoomActivity : AppCompatActivity() {
     }
     private fun retriveMessages(senderId: String, receiverId: String?)
     {
-        var chatside: String = ""
         mChatList = ArrayList()
-        val referenceFirestore = FirebaseFirestore.getInstance().collection("chats")
+        val referenceFirestore = FirebaseFirestore.getInstance().collection("chats").orderBy("createdAt", Query.Direction.ASCENDING)
 
-        referenceFirestore.get()
+        referenceFirestore
+            .get()
             .addOnSuccessListener { documents ->
                 (mChatList as ArrayList<Chat>).clear()
                 for (snapshot in documents)

@@ -1,5 +1,8 @@
 package com.example.zone.ModelClasses
 
+import com.google.firebase.firestore.ServerTimestamp
+import java.util.Date
+
 data class Chat(
     var sender: String? = "",
     var message: String? = "",
@@ -7,7 +10,8 @@ data class Chat(
     @field:JvmField
     var isseen: Boolean? = null,
     var url: String = "",
-    var messageId: String? = ""
+    var messageId: String? = "",
+    @ServerTimestamp val createdAt: Date? = null
 )
 /*
 class Chat {
