@@ -14,7 +14,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.squareup.picasso.Picasso
 
-@Suppress("UNREACHABLE_CODE")
 class ChatsAdapter(
     mContext: Context,
     mChatList: List<Chat>,
@@ -51,7 +50,7 @@ class ChatsAdapter(
     override fun getItemViewType(position: Int): Int {
         return super.getItemViewType(position)
 
-        return if (mChatList[position].getSender().equals(firebaseUser!!.uid))
+        return if (mChatList[position].sender.equals(firebaseUser!!.uid))
         {
             1
         }
@@ -81,32 +80,32 @@ class ChatsAdapter(
         val chat: Chat = mChatList[position]
 
         Picasso.get().load(imageUrl).into(holder.profile_image)
-        if (chat.getMessage().equals("sent you an image.") && !chat.getUrl().equals(""))
+        if (chat.message.equals("sent you an image.") && !chat.url.equals(""))
         {
-            if (chat.getSender().equals(firebaseUser!!.uid))
+            if (chat.sender.equals(firebaseUser!!.uid))
             {
                 holder.show_text_message!!.visibility = View.GONE
                 holder.right_image_view!!.visibility = View.VISIBLE
-                Picasso.get().load(chat.getUrl()).into(holder.right_image_view)
+                Picasso.get().load(chat.url).into(holder.right_image_view)
             }
-            else if (!chat.getSender().equals(firebaseUser!!.uid))
+            else if (!chat.sender.equals(firebaseUser!!.uid))
             {
                 holder.show_text_message!!.visibility = View.GONE
                 holder.left_image_view!!.visibility = View.VISIBLE
-                Picasso.get().load(chat.getUrl()).into(holder.left_image_view)
+                Picasso.get().load(chat.url).into(holder.left_image_view)
             }
 
         }
         else{
-            holder.show_text_message!!.text = chat.getMessage()
+            holder.show_text_message!!.text = chat.message
         }
 
         if (position == mChatList.size-1)
         {
-            if (chat.getIsSeen()!!)
+            if (chat.isseen!!)
             {
                 holder.text_seen!!.text = "Seen"
-                if (chat.getMessage().equals("sent you an image.") && !chat.getUrl().equals(""))
+                if (chat.message.equals("sent you an image.") && !chat.url.equals(""))
                 {
                     val lp: RelativeLayout.LayoutParams? = holder.text_seen!!.layoutParams as RelativeLayout.LayoutParams?
                     lp!!.setMargins(0, 245, 10,0)
@@ -116,7 +115,7 @@ class ChatsAdapter(
             else
             {
                 holder.text_seen!!.text = "Sent"
-                if (chat.getMessage().equals("sent you an image.") && !chat.getUrl().equals(""))
+                if (chat.message.equals("sent you an image.") && !chat.url.equals(""))
                 {
                     val lp: RelativeLayout.LayoutParams? = holder.text_seen!!.layoutParams as RelativeLayout.LayoutParams?
                     lp!!.setMargins(0, 245, 10,0)

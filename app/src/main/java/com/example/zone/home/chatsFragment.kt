@@ -76,9 +76,9 @@ class chatsFragment : Fragment() {
 
                     for (eachChatList in usersChatList!!)
                     {
-                        if (user!!.getUID().equals(eachChatList.getId()))
+                        if (user!!.uid.equals(eachChatList.id))
                         {
-                            (mUsers as ArrayList).add(user!!)
+                            (mUsers as ArrayList).add(user)
                         }
                     }
                 }
@@ -87,7 +87,7 @@ class chatsFragment : Fragment() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+
             }
         })
     }

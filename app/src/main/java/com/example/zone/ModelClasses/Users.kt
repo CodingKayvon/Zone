@@ -1,5 +1,13 @@
 package com.example.zone.ModelClasses
 
+data class Users(
+    var uid: String? = "",
+    var username: String? ="",
+    var profile: String? ="",
+    var status: String? ="",
+    var description: String? =""
+)
+/*
 class Users {
     private var uid: String = ""
     private var username: String = ""
@@ -62,3 +70,5 @@ class Users {
     }
 }
 
+
+ */

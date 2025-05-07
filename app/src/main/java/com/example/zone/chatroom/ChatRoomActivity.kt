@@ -82,11 +82,11 @@ class ChatRoomActivity : AppCompatActivity() {
             override fun onDataChange(p0: DataSnapshot) {
                 val user: Users? = p0.getValue(Users::class.java)
 
-                findViewById<TextView>(R.id.username_mc).text = user!!.getUserName()
+                findViewById<TextView>(R.id.username_mc).text = user!!.username
                 val profile_pic = findViewById<ImageView>(R.id.profile_image_mc)
-                Picasso.get().load(user.getProfile()).into(profile_pic)
+                Picasso.get().load(user.profile).into(profile_pic)
 
-                retriveMessages(firebaseUser!!.uid, userIdVisit, user!!.getProfile())
+                retriveMessages(firebaseUser!!.uid, userIdVisit, user.profile)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -163,7 +163,7 @@ class ChatRoomActivity : AppCompatActivity() {
                         }
 
                         override fun onCancelled(error: DatabaseError) {
-                            TODO("Not yet implemented")
+
                         }
                     })
                     chatListReference.child("id").setValue(firebaseUser!!.uid)
@@ -186,8 +186,8 @@ class ChatRoomActivity : AppCompatActivity() {
                 {
                     val chat = snapshot.getValue(Chat::class.java)
 
-                    if (chat!!.getReceiver().equals(senderId) && chat.getSender().equals(receiverId)
-                        || chat.getReceiver().equals(receiverId) && chat.getSender().equals(senderId))
+                    if (chat!!.receiver.equals(senderId) && chat.sender.equals(receiverId)
+                        || chat.receiver.equals(receiverId) && chat.sender.equals(senderId))
                     {
                         (mChatList as ArrayList<Chat>).add(chat)
                     }
@@ -197,7 +197,7 @@ class ChatRoomActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+
             }
         })
     }
@@ -251,12 +251,12 @@ class ChatRoomActivity : AppCompatActivity() {
     private fun seenMessage(userId: String)
     {
         val reference = FirebaseDatabase.getInstance().reference.child("chats")
-        seenListener = reference!!.addValueEventListener(object: ValueEventListener{
+        seenListener = reference.addValueEventListener(object: ValueEventListener{
             override fun onDataChange(p0: DataSnapshot) {
                 for (dataSnapshot in p0.children){
                     val chat = dataSnapshot.getValue(Chat::class.java)
 
-                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && chat!!.getSender().equals(userId))
+                    if (chat!!.receiver.equals(firebaseUser!!.uid) && chat.receiver.equals(userId))
                     {
                         val hashMap = HashMap<String, Any>()
                         hashMap["isseen"] = true
@@ -265,7 +265,7 @@ class ChatRoomActivity : AppCompatActivity() {
                 }
             }
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+
             }
         })
 

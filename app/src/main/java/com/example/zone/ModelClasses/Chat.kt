@@ -1,5 +1,15 @@
 package com.example.zone.ModelClasses
 
+data class Chat(
+    var sender: String? = "",
+    var message: String? = "",
+    var receiver: String? = "",
+    @field:JvmField
+    var isseen: Boolean? = null,
+    var url: String = "",
+    var messageId: String? = ""
+)
+/*
 class Chat {
     private var sender: String = ""
     private var message: String = ""
@@ -72,3 +82,5 @@ class Chat {
     }
 
 }
+
+ */

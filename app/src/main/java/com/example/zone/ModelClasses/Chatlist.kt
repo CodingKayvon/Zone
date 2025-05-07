@@ -1,9 +1,11 @@
 package com.example.zone.ModelClasses
 
+data class Chatlist(
+    var id: String? = ""
+)
+/*
 class Chatlist {
     private var id: String = ""
-
-    constructor()
 
     constructor(id: String) {
         this.id = id
@@ -17,3 +19,5 @@ class Chatlist {
         this.id = id
     }
 }
+
+ */
