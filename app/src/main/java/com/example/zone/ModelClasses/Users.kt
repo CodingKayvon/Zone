@@ -1,15 +1,15 @@
 package com.example.zone.ModelClasses
 
-class Users(
-    private var uid: String,
-    private var username: String,
-    private var profile: String,
-    private var status: String,
-    private var description: String
+data class Users(
+    private var uid: String? = "",
+    private var username: String? = "",
+    private var profile: String? = "",
+    private var status: String? = "",
+    private var description: String? = ""
 ) {
 
     fun getUID(): String {
-        return uid
+        return uid!!
     }
 
     fun setUID(uid: String){
@@ -17,7 +17,7 @@ class Users(
     }
 
     fun getUserName(): String {
-        return username
+        return username!!
     }
 
     fun setUserName(username: String){
@@ -25,7 +25,7 @@ class Users(
     }
 
     fun getProfile(): String {
-        return profile
+        return profile!!
     }
 
     fun setProfile(profile: String){
@@ -33,7 +33,7 @@ class Users(
     }
 
     fun getStatus(): String {
-        return status
+        return status!!
     }
 
     fun setStatus(status: String){
@@ -41,7 +41,7 @@ class Users(
     }
 
     fun getDescription(): String {
-        return description
+        return description!!
     }
 
     fun setDescription(description: String){
