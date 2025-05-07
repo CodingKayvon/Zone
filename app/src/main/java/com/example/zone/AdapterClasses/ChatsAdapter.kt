@@ -51,7 +51,7 @@ class ChatsAdapter(
     override fun getItemViewType(position: Int): Int {
         return super.getItemViewType(position)
 
-        return if (mChatList[position].getSender().equals(firebaseUser.uid))
+        return if (mChatList[position].getSender().equals(firebaseUser!!.uid))
         {
             1
         }
@@ -63,12 +63,12 @@ class ChatsAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return if (viewType == 1)
         {
-            val view: View = LayoutInflater.from(mContext).inflate(R.layout.message_item_right, parent, false)
+            val view: View = LayoutInflater.from(mContext).inflate(com.example.zone.R.layout.message_item_right, parent, false)
             ViewHolder(view)
         }
         else
         {
-            val view: View = LayoutInflater.from(mContext).inflate(R.layout.message_item_left, parent, false)
+            val view: View = LayoutInflater.from(mContext).inflate(com.example.zone.R.layout.message_item_left, parent, false)
             ViewHolder(view)
         }
     }
@@ -83,13 +83,13 @@ class ChatsAdapter(
         Picasso.get().load(imageUrl).into(holder.profile_image)
         if (chat.getMessage().equals("sent you an image.") && !chat.getUrl().equals(""))
         {
-            if (chat.getSender().equals(firebaseUser.uid))
+            if (chat.getSender().equals(firebaseUser!!.uid))
             {
                 holder.show_text_message!!.visibility = View.GONE
                 holder.right_image_view!!.visibility = View.VISIBLE
                 Picasso.get().load(chat.getUrl()).into(holder.right_image_view)
             }
-            else if (!chat.getSender().equals(firebaseUser.uid))
+            else if (!chat.getSender().equals(firebaseUser!!.uid))
             {
                 holder.show_text_message!!.visibility = View.GONE
                 holder.left_image_view!!.visibility = View.VISIBLE

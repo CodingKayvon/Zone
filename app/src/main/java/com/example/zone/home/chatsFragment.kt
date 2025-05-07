@@ -41,7 +41,7 @@ class chatsFragment : Fragment() {
         usersChatList = ArrayList()
 
         val ref = FirebaseDatabase.getInstance().reference.child("chatlist").child(firebaseUser!!.uid)
-        ref.addValueEventListener(object : ValueEventListener{
+        ref!!.addValueEventListener(object : ValueEventListener{
             override fun onDataChange(p0: DataSnapshot) {
                 (usersChatList as ArrayList).clear()
 
@@ -66,7 +66,7 @@ class chatsFragment : Fragment() {
     private fun retrieveChatLists(){
         mUsers = ArrayList()
         val ref = FirebaseDatabase.getInstance().reference.child("users")
-        ref.addValueEventListener(object: ValueEventListener {
+        ref!!.addValueEventListener(object: ValueEventListener {
             override fun onDataChange(p0: DataSnapshot) {
                 (mUsers as ArrayList).clear()
 
@@ -78,7 +78,7 @@ class chatsFragment : Fragment() {
                     {
                         if (user!!.getUID().equals(eachChatList.getId()))
                         {
-                            (mUsers as ArrayList).add(user)
+                            (mUsers as ArrayList).add(user!!)
                         }
                     }
                 }

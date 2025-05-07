@@ -11,13 +11,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.example.zone.R
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 
 class SignUpActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-    //private lateinit var db: FirebaseFirestore
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +24,7 @@ class SignUpActivity : AppCompatActivity() {
         setContentView(R.layout.activity_sign_up)
 
         //Firebase Auth
-        //db = FirebaseFirestore.getInstance()
+        db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
 
         //Connecting designs
@@ -72,21 +71,8 @@ class SignUpActivity : AppCompatActivity() {
                     userdata["uid"] = userId
                     userdata["description"] = "I'm a new user!"
                     userdata["status"] = "offline"
-                    userdata["profile"] = "https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250"
-                    userdata["search"] = username.toLowerCase()
+                    userdata["profile"] =""
 
-                    val refUsers = FirebaseDatabase.getInstance().reference.child("users").child(userId)
-                    refUsers.updateChildren(userdata)
-                        .addOnCompleteListener{ task ->
-                            if (task.isSuccessful)
-                            {
-                               // val intent = Intent(this@SignUpActivity, SignInActivity::class.java)
-                                Toast.makeText(this, "Sign-up Successful", Toast.LENGTH_SHORT).show()
-                                //startActivity(intent)
-                                //finish()
-                            }
-                        }
-                    /*
                     db.collection("users").document(userId)
                         .set(userdata)
                         .addOnSuccessListener {
@@ -98,8 +84,6 @@ class SignUpActivity : AppCompatActivity() {
                             Log.w("dbFirebase", "Failed to save user data: ", e)
                             Toast.makeText(this, "Failed to save data: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
-
-                     */
                 }
                 .addOnFailureListener { e ->
                     Log.w("dbFirebase", "Sign-up Failed", e)

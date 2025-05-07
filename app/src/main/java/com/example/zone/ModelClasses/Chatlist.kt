@@ -1,8 +1,15 @@
 package com.example.zone.ModelClasses
 
-class Chatlist(private var id: String) {
+class Chatlist {
+    private var id: String = ""
 
-    fun getId(): String {
+    constructor()
+
+    constructor(id: String) {
+        this.id = id
+    }
+
+    fun getId(): String?{
         return id
     }
 

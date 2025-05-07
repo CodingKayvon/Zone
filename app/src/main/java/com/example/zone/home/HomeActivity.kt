@@ -13,7 +13,7 @@ class HomeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_home)
 
         // Set default fragment (chatsFragment)
-        loadFragment(profileFragment())
+        loadFragment(chatsFragment())
 
         // Set up bottom navigation
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
