@@ -23,6 +23,7 @@ class HomeActivity : AppCompatActivity() {
             when (menuItem.itemId) {
                 R.id.ic_chats -> loadFragment(chatsFragment())
                 R.id.nav_friends -> loadFragment(friendfindingFragment())
+                R.id.ic_eventMap -> loadFragment(MapsFragment())
                 R.id.ic_profile -> loadFragment(profileFragment())
                 else -> false
             }
