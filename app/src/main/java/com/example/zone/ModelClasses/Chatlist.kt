@@ -1,8 +1,8 @@
 package com.example.zone.ModelClasses
 
 data class Chatlist(
-    var id: String? = "",
-    //var receiver: String? = ""
+    var sender: String? = "",
+    var receiver: String? = ""
 )
 /*
 class Chatlist {

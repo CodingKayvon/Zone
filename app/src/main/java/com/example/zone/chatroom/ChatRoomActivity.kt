@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.zone.AdapterClasses.ChatsAdapter
 import com.example.zone.ModelClasses.Chat
+import com.example.zone.ModelClasses.Chatlist
 import com.example.zone.ModelClasses.Users
 import com.example.zone.R
 import com.example.zone.home.HomeActivity
@@ -49,6 +50,7 @@ class ChatRoomActivity : AppCompatActivity() {
     var chatsAdapter: ChatsAdapter? = null
     var mChatList: List<Chat>? = null
     lateinit var recycler_view_chats: RecyclerView
+    lateinit var userNameText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +72,7 @@ class ChatRoomActivity : AppCompatActivity() {
         intent = intent
         userIdVisit = intent.getStringExtra("visit_id")!!
         firebaseUser =  FirebaseAuth.getInstance().currentUser
+        userNameText = findViewById(R.id.username_mc)
 
         recycler_view_chats = findViewById(R.id.recycler_view_chats)
         recycler_view_chats.setHasFixedSize(true)
@@ -92,6 +95,7 @@ class ChatRoomActivity : AppCompatActivity() {
                         if (document != null)
                         {
                             val user = document.toObject<Users>()
+                            userNameText.text = user!!.username
                             retriveMessages(firebaseUser!!.uid, userIdVisit)
                         }
                     }
@@ -149,22 +153,42 @@ class ChatRoomActivity : AppCompatActivity() {
         referenceFirestore.collection("chats")
             .add(messageHashMap)
             .addOnSuccessListener { document ->
+
                 val chatlistHash = HashMap<String, Any?>()
 
                 //create chatlist item for sender if it doesnt already exist
-                chatlistHash["receiver"] = receiverId
                 val chatListReference = FirebaseFirestore.getInstance()
+                var chatFound = false
+                chatListReference.collection("chatlist")
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        for (snapshot in documents)
+                        {
+                            val chatListItem = snapshot.toObject<Chatlist>()
+                            if (chatListItem.sender == senderId && chatListItem.receiver == receiverId)
+                            {
+                                chatFound = true
+                            }
+                        }
+                    }
+                if (!chatFound)
+                {
+                    chatlistHash["receiver"] = receiverId
+                    chatlistHash["sender"] = senderId
                     chatListReference
-                    .collection("chatlist")
-                    .document(senderId)
-                    .set(chatlistHash)
+                        .collection("chatlist")
+                        .document()
+                        .set(chatlistHash)
 
-                //Create chatlist for receiver if it doesnt already exist
-                chatlistHash["receiver"] = senderId
-                chatListReference
-                    .collection("chatlist")
-                    .document(receiverId)
-                    .set(chatlistHash)
+                    //Create chatlist for receiver if it doesnt already exist
+                    chatlistHash["receiver"] = senderId
+                    chatlistHash["sender"] = receiverId
+                    chatListReference
+                        .collection("chatlist")
+                        .document(receiverId)
+                        .set(chatlistHash)
+
+                }
 
                 messageHashMap["messageId"] = document.id
                 referenceFirestore

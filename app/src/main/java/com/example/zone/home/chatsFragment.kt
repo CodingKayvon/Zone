@@ -1,6 +1,7 @@
 package com.example.zone.home
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,10 +14,8 @@ import com.example.zone.ModelClasses.Users
 import com.example.zone.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 
 class chatsFragment : Fragment() {
     private var userAdapter: UserAdapter? = null
@@ -31,65 +30,72 @@ class chatsFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_chats, container, false)
-
+        Log.d("CHATS FRAG", "1")
         recycler_view_chat_list = view.findViewById(R.id.recycler_view_chat_list)
         recycler_view_chat_list.setHasFixedSize(true)
         recycler_view_chat_list.layoutManager = LinearLayoutManager(context)
-
+        Log.d("CHATS FRAG", "2")
         firebaseUser = FirebaseAuth.getInstance().currentUser
 
         usersChatList = ArrayList()
+        Log.d("CHATS FRAG", "3")
+        val refFirestore = FirebaseFirestore.getInstance()
+            .collection("chatlist")
 
-        val ref = FirebaseDatabase.getInstance().reference.child("chatlist").child(firebaseUser!!.uid)
-        ref!!.addValueEventListener(object : ValueEventListener{
-            override fun onDataChange(p0: DataSnapshot) {
-                (usersChatList as ArrayList).clear()
+        refFirestore.get()
+            .addOnSuccessListener { documents ->
+                Log.d("CHATS FRAG", "4")
+                if (documents != null) {
+                    Log.d("CHATS FRAG", "5")
+                    (usersChatList as ArrayList<Chatlist>).clear()
+                    Log.d("CHATS FRAG", "6")
+                    for (snapshot in documents) {
+                        Log.d("CHATS FRAG", "7")
+                        val chatlist = snapshot.toObject<Chatlist>()
 
-                for (dataSnapShot in p0.children)
-                {
-                    val chatlist = dataSnapShot.getValue(Chatlist::class.java)
-
-                    (usersChatList as ArrayList).add(chatlist!!)
+                        if (chatlist.sender == firebaseUser!!.uid) {
+                            (usersChatList as ArrayList<Chatlist>).add(chatlist)
+                            Log.d("CHATS FRAG", "8")
+                        }
+                    }
+                    Log.d("CHATS FRAG", "9")
+                    retrieveChatLists()
                 }
-                retrieveChatLists()
             }
-
-            override fun onCancelled(error: DatabaseError) {
-
-
-            }
-        })
 
         return view
 
     }
     private fun retrieveChatLists(){
         mUsers = ArrayList()
-        val ref = FirebaseDatabase.getInstance().reference.child("users")
-        ref!!.addValueEventListener(object: ValueEventListener {
-            override fun onDataChange(p0: DataSnapshot) {
-                (mUsers as ArrayList).clear()
-
-                for (dataSnapshot in p0.children)
-                {
-                    val user = dataSnapshot.getValue(Users::class.java)
-
-                    for (eachChatList in usersChatList!!)
-                    {
-                        if (user!!.uid.equals(eachChatList.id))
-                        {
-                            (mUsers as ArrayList).add(user)
+        val refFireStore = FirebaseFirestore.getInstance().collection("users")
+        refFireStore.get()
+            .addOnSuccessListener { documents ->
+                Log.d("RET FRAG", "1")
+                if (documents != null) {
+                    (mUsers as ArrayList<Users>).clear()
+                    Log.d("RET FRAG", "2")
+                    for (snapshot in documents) {
+                        Log.d("RET FRAG", "3")
+                        val user = snapshot.toObject<Users>()
+                        for (eachChatlist in usersChatList!!) {
+                            if (user.uid == eachChatlist.receiver) {
+                                Log.d("RET FRAG", "4")
+                                (mUsers as ArrayList<Users>).add(user)
+                            }
                         }
                     }
+                    val ctx = context
+                    if ((mUsers as ArrayList<Users>).isNotEmpty() && ctx != null)
+                    {
+                        Log.d("RET FRAG", "5")
+                        userAdapter = UserAdapter(requireContext(), (mUsers as ArrayList<Users>), false)
+                        Log.d("RET FRAG", "6")
+                        recycler_view_chat_list.adapter = userAdapter
+                    }
                 }
-                userAdapter = UserAdapter(context!!, (mUsers as ArrayList<Users>), true)
-                recycler_view_chat_list.adapter = userAdapter
             }
 
-            override fun onCancelled(error: DatabaseError) {
-
-            }
-        })
     }
 }
 

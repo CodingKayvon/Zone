@@ -23,7 +23,7 @@ class UserAdapter(
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
             val view:View = LayoutInflater.from(mContext).inflate(R.layout.user_search_item_layout, viewGroup, false)
-            return UserAdapter.ViewHolder(view)
+            return ViewHolder(view)
         }
         override fun getItemCount(): Int {
             return mUsers.size
