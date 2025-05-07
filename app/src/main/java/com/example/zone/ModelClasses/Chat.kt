@@ -1,16 +1,16 @@
 package com.example.zone.ModelClasses
 
 class Chat(
-    private var sender: String? = "",
-    private var message: String? = "",
-    private var receiver: String? = "",
-    private var isseen: Boolean? = null,
-    private var url: String? = "",
-    private var messageId: String? = ""
+    private var sender: String,
+    private var message: String,
+    private var receiver: String,
+    private var isseen: Boolean,
+    private var url: String,
+    private var messageId: String
 ) {
 
     fun getSender(): String {
-        return sender!!
+        return sender
     }
 
     fun setSender(sender: String) {
@@ -18,7 +18,7 @@ class Chat(
     }
 
     fun getMessage(): String {
-        return message!!
+        return message
     }
 
     fun setMessage(message: String) {
@@ -26,7 +26,7 @@ class Chat(
     }
 
     fun getReceiver(): String {
-        return receiver!!
+        return receiver
     }
 
     fun setReceiver(receiver: String){
@@ -34,7 +34,7 @@ class Chat(
     }
 
     fun getIsSeen(): Boolean {
-        return isseen!!
+        return isseen
     }
 
     fun setIsSeen(isseen: Boolean) {
@@ -42,7 +42,7 @@ class Chat(
     }
 
     fun getUrl(): String {
-        return url!!
+        return url
     }
 
     fun setUrl(url: String) {
@@ -50,7 +50,7 @@ class Chat(
     }
 
     fun getMessageId(): String {
-        return messageId!!
+        return messageId
     }
 
     fun setMessageId(messageId: String){

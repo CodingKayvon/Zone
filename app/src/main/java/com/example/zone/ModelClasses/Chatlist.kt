@@ -1,9 +1,9 @@
 package com.example.zone.ModelClasses
 
-class Chatlist(private var id: String? = "") {
+class Chatlist(private var id: String) {
 
     fun getId(): String {
-        return id!!
+        return id
     }
 
     fun setId(id: String){
