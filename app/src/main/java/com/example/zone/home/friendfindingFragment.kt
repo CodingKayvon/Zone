@@ -15,6 +15,10 @@ import com.example.zone.AdapterClasses.UserAdapter
 import com.example.zone.ModelClasses.Users
 import com.example.zone.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 
@@ -64,6 +68,19 @@ class friendfindingFragment : Fragment() {
         Log.d("RETRIEVE", "1")
         val firebaseUserID = FirebaseAuth.getInstance().currentUser?.uid
         val refUsersFireStore = FirebaseFirestore.getInstance().collection("users")
+
+        val refUsers = FirebaseDatabase.getInstance().reference
+
+        refUsers.child("users")
+            .addValueEventListener(object: ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+            })
 
         refUsersFireStore.get()
             .addOnSuccessListener { documentSnapshot ->

@@ -2,6 +2,7 @@ package com.example.zone.AdapterClasses
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +31,8 @@ class UserAdapter(
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val user: Users = mUsers[position]
             holder.userNameTxt.text = user.username
+            val uid = user.uid
+            //picasso will be frozen until we decide to purchase storage space on firebase
             //Picasso.get().load(user.profile).placeholder(R.drawable.ic_profile_placeholder_foreground).into(holder.profileImageView)
 
             holder.itemView.setOnClickListener {
@@ -43,6 +46,13 @@ class UserAdapter(
                     if (which == 0)
                     {
                         val intent = Intent(mContext, ChatRoomActivity::class.java)
+                        if (uid != null) {
+                            Log.d("user intent", uid)
+                        }
+                        else
+                        {
+                            Log.d("user intent", "FAILED")
+                        }
                         intent.putExtra("visit_id", user.uid)
                         mContext.startActivity(intent)
                     }

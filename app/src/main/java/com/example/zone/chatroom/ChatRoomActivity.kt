@@ -5,6 +5,7 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -32,6 +33,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
@@ -47,7 +49,6 @@ class ChatRoomActivity : AppCompatActivity() {
     var chatsAdapter: ChatsAdapter? = null
     var mChatList: List<Chat>? = null
     lateinit var recycler_view_chats: RecyclerView
-    var reference: DatabaseReference? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,23 +77,28 @@ class ChatRoomActivity : AppCompatActivity() {
         linearLayoutManager.stackFromEnd = true
         recycler_view_chats.layoutManager = linearLayoutManager
 
-        reference = FirebaseDatabase.getInstance().reference
-            .child("users").child(userIdVisit!!)
-        reference!!.addValueEventListener(object : ValueEventListener{
-            override fun onDataChange(p0: DataSnapshot) {
-                val user: Users? = p0.getValue(Users::class.java)
+        val reference = FirebaseFirestore.getInstance().collection("users").document(userIdVisit)
 
-                findViewById<TextView>(R.id.username_mc).text = user!!.username
-                val profile_pic = findViewById<ImageView>(R.id.profile_image_mc)
-                Picasso.get().load(user.profile).into(profile_pic)
-
-                retriveMessages(firebaseUser!!.uid, userIdVisit, user.profile)
+        reference.addSnapshotListener{ snapshot, e->
+            if (e != null)
+            {
+                Log.d("Listener", "FAILED")
             }
+            else
+            {
 
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                reference.get()
+                    .addOnSuccessListener { document ->
+                        if (document != null)
+                        {
+                            val user = document.toObject<Users>()
+                            retriveMessages(firebaseUser!!.uid, userIdVisit)
+                        }
+                    }
             }
-        })
+        }
+
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -109,9 +115,11 @@ class ChatRoomActivity : AppCompatActivity() {
             }
             else {
                 sendMessageToUser(firebaseUser!!.uid, userIdVisit, message)
+                retriveMessages(firebaseUser!!.uid, userIdVisit)
             }
             textBox.setText("")
         }
+        /* WILL NOT WORK WITHOUT PURCHASED FIREBASE STORAGE
         val attatch_image_file_btn = findViewById<Button>(R.id.attatch_image_file_btn)
         attatch_image_file_btn.setOnClickListener {
             val intent = Intent()
@@ -120,15 +128,16 @@ class ChatRoomActivity : AppCompatActivity() {
             startActivityForResult(Intent.createChooser(intent,"Pick Image"), 438)
         }
 
+         */
+
         seenMessage(userIdVisit)
     }
 
     /**************************************************************************************
      * creates a message data fragment to send to database                                *
      **************************************************************************************/
-    private fun sendMessageToUser(senderId: String, receiverId: String?, message: String) {
-        val reference = FirebaseDatabase.getInstance().reference
-        val messageKey = reference.push().key
+    private fun sendMessageToUser(senderId: String, receiverId: String, message: String) {
+        val referenceFirestore = FirebaseFirestore.getInstance()
 
         val messageHashMap = HashMap<String, Any?>()
         messageHashMap["sender"] = senderId
@@ -136,72 +145,68 @@ class ChatRoomActivity : AppCompatActivity() {
         messageHashMap["receiver"] = receiverId
         messageHashMap["isseen"] = false
         messageHashMap["url"] = ""
-        messageHashMap["messageId"] = messageKey
-        reference.child("chats")
-            .child(messageKey!!)
-            .setValue(messageHashMap)
-            .addOnCompleteListener {task ->
-                if (task.isSuccessful)
-                {
-                    val chatListReference = FirebaseDatabase.getInstance()
-                        .reference
-                        .child("chatlist")
-                        .child(firebaseUser!!.uid)
-                        .child(userIdVisit)
-                    chatListReference.addListenerForSingleValueEvent(object: ValueEventListener{
-                        override fun onDataChange(p0: DataSnapshot) {
-                            if (!p0.exists())
-                            {
-                                chatListReference.child("id").setValue(userIdVisit)
-                            }
-                            val chatListRecieverReference = FirebaseDatabase.getInstance()
-                                .reference
-                                .child("chatlist")
-                                .child(userIdVisit)
-                                .child(firebaseUser!!.uid)
-                            chatListRecieverReference.child("id").setValue(firebaseUser!!.uid)
-                        }
+        messageHashMap["messageId"] = "-1"
+        referenceFirestore.collection("chats")
+            .add(messageHashMap)
+            .addOnSuccessListener { document ->
+                val chatlistHash = HashMap<String, Any?>()
 
-                        override fun onCancelled(error: DatabaseError) {
+                //create chatlist item for sender if it doesnt already exist
+                chatlistHash["receiver"] = receiverId
+                val chatListReference = FirebaseFirestore.getInstance()
+                    chatListReference
+                    .collection("chatlist")
+                    .document(senderId)
+                    .set(chatlistHash)
 
-                        }
-                    })
-                    chatListReference.child("id").setValue(firebaseUser!!.uid)
+                //Create chatlist for receiver if it doesnt already exist
+                chatlistHash["receiver"] = senderId
+                chatListReference
+                    .collection("chatlist")
+                    .document(receiverId)
+                    .set(chatlistHash)
+
+                messageHashMap["messageId"] = document.id
+                referenceFirestore
+                    .collection("chats")
+                    .document(document.id)
+                    .update("messageId", messageHashMap["messageId"])
+            }
+
 
 
 
                     //add notifs
-                }
-            }
     }
-    private fun retriveMessages(senderId: String, receiverId: String?, profile: String?)
+    private fun retriveMessages(senderId: String, receiverId: String?)
     {
+        var chatside: String = ""
         mChatList = ArrayList()
-        val reference = FirebaseDatabase.getInstance().reference.child("chats")
+        val referenceFirestore = FirebaseFirestore.getInstance().collection("chats")
 
-        reference.addValueEventListener(object : ValueEventListener{
-            override fun onDataChange(p0: DataSnapshot) {
+        referenceFirestore.get()
+            .addOnSuccessListener { documents ->
                 (mChatList as ArrayList<Chat>).clear()
-                for (snapshot in p0.children)
+                for (snapshot in documents)
                 {
-                    val chat = snapshot.getValue(Chat::class.java)
-
-                    if (chat!!.receiver.equals(senderId) && chat.sender.equals(receiverId)
-                        || chat.receiver.equals(receiverId) && chat.sender.equals(senderId))
+                    val chat = snapshot.toObject<Chat>()
+                    if (chat.receiver.equals(senderId) && chat.sender.equals(receiverId))
                     {
                         (mChatList as ArrayList<Chat>).add(chat)
+                        chatside = "left"
+                    }
+                    else if (chat.receiver.equals(receiverId) && chat.sender.equals(senderId))
+                    {
+                        (mChatList as ArrayList<Chat>).add(chat)
+                        chatside = "right"
                     }
                 }
-                chatsAdapter = ChatsAdapter(this@ChatRoomActivity, (mChatList as ArrayList<Chat>), profile!!)
+                chatsAdapter = ChatsAdapter(this@ChatRoomActivity, mChatList!!, chatside)
                 recycler_view_chats.adapter = chatsAdapter
             }
-
-            override fun onCancelled(error: DatabaseError) {
-
-            }
-        })
+        seenMessage(userIdVisit)
     }
-
+/* WONT WORK WITHOUT FIREBASE STORAGE PURCHASE
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 438 && resultCode == RESULT_OK && data!=null && data!!.data!=null)
@@ -247,32 +252,26 @@ class ChatRoomActivity : AppCompatActivity() {
 
         }
     }
-    var seenListener: ValueEventListener? = null
+    */
     private fun seenMessage(userId: String)
     {
-        val reference = FirebaseDatabase.getInstance().reference.child("chats")
-        seenListener = reference.addValueEventListener(object: ValueEventListener{
-            override fun onDataChange(p0: DataSnapshot) {
-                for (dataSnapshot in p0.children){
-                    val chat = dataSnapshot.getValue(Chat::class.java)
-
-                    if (chat!!.receiver.equals(firebaseUser!!.uid) && chat.receiver.equals(userId))
+        val referenceFirestore = FirebaseFirestore.getInstance().collection("chats")
+            referenceFirestore.get()
+                .addOnSuccessListener { documents ->
+                    for (snapshot in documents)
                     {
-                        val hashMap = HashMap<String, Any>()
-                        hashMap["isseen"] = true
-                        dataSnapshot.ref.updateChildren(hashMap)
+                        val chat = snapshot.toObject<Chat>()
+
+                        if (chat.receiver == firebaseUser!!.uid && chat.receiver == userId)
+                        {
+                            FirebaseFirestore.getInstance()
+                                .collection("chats")
+                                .document(snapshot.id)
+                                .update("isseen", true)
+                        }
                     }
                 }
-            }
-            override fun onCancelled(error: DatabaseError) {
-
-            }
-        })
 
     }
 
-    override fun onPause() {
-        super.onPause()
-        reference!!.removeEventListener(seenListener!!)
-    }
 }
