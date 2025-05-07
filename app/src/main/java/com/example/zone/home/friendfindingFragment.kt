@@ -13,13 +13,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.zone.AdapterClasses.UserAdapter
 import com.example.zone.ModelClasses.Users
 import com.example.zone.R
-import com.google.api.Distribution.BucketOptions.Linear
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.util.Locale
 
 
 class friendfindingFragment : Fragment() {
@@ -31,9 +30,10 @@ class friendfindingFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         val view: View = inflater.inflate(R.layout.fragment_friendfinding, container, false)
+
 
         recyclerView = view.findViewById(R.id.searchList)
         recyclerView!!.setHasFixedSize(true)
@@ -42,11 +42,11 @@ class friendfindingFragment : Fragment() {
         mUsers = ArrayList()
         retrieveAllUsers()
 
-        searchEditText = view.findViewById<EditText>(R.id.searchUsersET)
+        searchEditText = view.findViewById(R.id.searchUsersET)
 
         searchEditText!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                TODO("Not yet implemented")
+                print("fail")
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -54,38 +54,11 @@ class friendfindingFragment : Fragment() {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                TODO("Not yet implemented")
+                print("fail")
             }
         })
         return view
-        //add functionality to the button when you get the chance, i left some working functions for it
 
-
-
-        /*
-        val view = inflater.inflate(R.layout.fragment_friendfinding, container, false)
-
-        searchView = view.findViewById(R.id.searchView)
-        addFriendButton = view.findViewById(R.id.addFriendButton)
-        suggestedFriendsList = view.findViewById(R.id.suggestedFriendsList)
-        addedFriendsList = view.findViewById(R.id.addedFriendsList)
-
-        loadSuggestedFriends()
-
-         */
-        // addedFriendsList stays blank for now
-/*
-        addFriendButton.setOnClickListener {
-            val searchText = searchView.query.toString().trim()
-            if (searchText.isNotEmpty()) {
-                Toast.makeText(requireContext(), "Friend request sent to $searchText!", Toast.LENGTH_SHORT).show()
-                searchView.setQuery("", false) // Clear after adding
-            } else {
-                Toast.makeText(requireContext(), "Please search a username first!", Toast.LENGTH_SHORT).show()
-            }
-        }
-
- */
     }
 
     private fun retrieveAllUsers() {
@@ -99,7 +72,7 @@ class friendfindingFragment : Fragment() {
                 {
                     for (snapshot in p0.children) {
                         val user: Users? = snapshot.getValue(Users::class.java)
-                        if (!(user!!.getUID()).equals(firebaseUserID)) {
+                        if (user!!.getUID()!= firebaseUserID) {
                             (mUsers as ArrayList<Users>).add(user)
                         }
                     }
@@ -109,7 +82,7 @@ class friendfindingFragment : Fragment() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                print("fail")
             }
         })
     }
@@ -126,54 +99,19 @@ class friendfindingFragment : Fragment() {
                 (mUsers as ArrayList<Users>).clear()
                 for (snapshot in p0.children) {
                     val user: Users? = snapshot.getValue(Users::class.java)
-                    if (!(user!!.getUID()).equals(firebaseUserID)) {
+                    if (user!!.getUID()!=firebaseUserID) {
                         (mUsers as ArrayList<Users>).add(user)
                     }
                 }
                 userAdapter = UserAdapter(context!!, mUsers!!, false)
                 recyclerView!!.adapter = userAdapter
             }
-
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                print("fail")
             }
         })
 
-        /*
-        val queryUsers = FirebaseDatabase.getInstance().reference
-            .child("users").orderByChild("username")
-            .startAt(str)
-            .endAt(str + "\uf8ff")
-        queryUsers.addValueEventListener(object: ValueEventListener{
-            override fun onDataChange(p0: DataSnapshot) {
-                (mUsers as ArrayList<Users>).clear()
-                for (snapshot in p0.children) {
-                    val user: Users? = p0.getValue(Users::class.java)
-                    if (!(user!!.getUID()).equals(firebaseUserID)) {
-                        (mUsers as ArrayList<Users>).add(user)
-                    }
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-        })
-        */
 
 
     }
-/*
-    private fun loadSuggestedFriends() {
-        for (friendName in suggestedFriends) {
-            val textView = TextView(requireContext()).apply {
-                text = friendName
-                textSize = 18f
-                setPadding(0, 8, 0, 8)
-            }
-            suggestedFriendsList.addView(textView)
-        }
-    }
-
- */
 }

@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.zone.ModelClasses.Users
 import com.example.zone.R
@@ -21,8 +20,8 @@ class UserAdapter(
     mUsers: List<Users>,
     isChatCheck: Boolean): RecyclerView.Adapter<UserAdapter.ViewHolder?>()
 {
-        private val mContext:Context
-        private val mUsers: List<Users>
+        private var mContext:Context
+        private var mUsers: List<Users>
         private var isChatCheck: Boolean
 
         init {
@@ -33,14 +32,14 @@ class UserAdapter(
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
             val view:View = LayoutInflater.from(mContext).inflate(R.layout.user_search_item_layout, viewGroup, false)
-            return UserAdapter.ViewHolder(view)
+            return ViewHolder(view)
         }
         override fun getItemCount(): Int {
             return mUsers.size
         }
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val user: Users = mUsers[position]
-            holder.userNameTxt.text = user!!.getUserName()
+            holder.userNameTxt.text = user.getUserName()
             Picasso.get().load(user.getProfile()).placeholder(R.drawable.ic_profile_placeholder_foreground).into(holder.profileImageView)
 
             holder.itemView.setOnClickListener {
@@ -59,7 +58,7 @@ class UserAdapter(
                     }
                     if (which == 1)
                     {
-
+                        print("fail")
                     }
                 })
                 builder.show()

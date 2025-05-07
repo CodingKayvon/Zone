@@ -77,7 +77,7 @@ class ChatRoomActivity : AppCompatActivity() {
         recycler_view_chats.layoutManager = linearLayoutManager
 
         reference = FirebaseDatabase.getInstance().reference
-            .child("users").child(userIdVisit!!)
+            .child("users").child(userIdVisit)
         reference!!.addValueEventListener(object : ValueEventListener{
             override fun onDataChange(p0: DataSnapshot) {
                 val user: Users? = p0.getValue(Users::class.java)
@@ -86,7 +86,7 @@ class ChatRoomActivity : AppCompatActivity() {
                 val profile_pic = findViewById<ImageView>(R.id.profile_image_mc)
                 Picasso.get().load(user.getProfile()).into(profile_pic)
 
-                retriveMessages(firebaseUser!!.uid, userIdVisit, user!!.getProfile())
+                retriveMessages(firebaseUser!!.uid, userIdVisit, user.getProfile())
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -102,7 +102,7 @@ class ChatRoomActivity : AppCompatActivity() {
         val sendButton = findViewById<Button>(R.id.send_message_button)
         val textBox = findViewById<EditText>(R.id.text_message)
 
-        sendButton.setOnClickListener() {
+        sendButton.setOnClickListener {
             val message = textBox.text.toString()
             if (message =="") {
                 Toast.makeText(this@ChatRoomActivity, "Please write a message first...", Toast.LENGTH_LONG).show()
@@ -163,7 +163,7 @@ class ChatRoomActivity : AppCompatActivity() {
                         }
 
                         override fun onCancelled(error: DatabaseError) {
-                            TODO("Not yet implemented")
+                            print("fail")
                         }
                     })
                     chatListReference.child("id").setValue(firebaseUser!!.uid)
@@ -197,14 +197,14 @@ class ChatRoomActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                print("fail")
             }
         })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 438 && resultCode == RESULT_OK && data!=null && data!!.data!=null)
+        if (requestCode == 438 && resultCode == RESULT_OK && data!=null && data.data!=null)
         {
             val loadingBar = ProgressDialog(this)
             loadingBar.setMessage("Please wait, image is sending...")
@@ -251,12 +251,12 @@ class ChatRoomActivity : AppCompatActivity() {
     private fun seenMessage(userId: String)
     {
         val reference = FirebaseDatabase.getInstance().reference.child("chats")
-        seenListener = reference!!.addValueEventListener(object: ValueEventListener{
+        seenListener = reference.addValueEventListener(object: ValueEventListener{
             override fun onDataChange(p0: DataSnapshot) {
                 for (dataSnapshot in p0.children){
                     val chat = dataSnapshot.getValue(Chat::class.java)
 
-                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && chat!!.getSender().equals(userId))
+                    if (chat!!.getReceiver().equals(firebaseUser!!.uid) && chat.getSender().equals(userId))
                     {
                         val hashMap = HashMap<String, Any>()
                         hashMap["isseen"] = true

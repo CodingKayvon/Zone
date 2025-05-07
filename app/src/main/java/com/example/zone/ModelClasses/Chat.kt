@@ -1,29 +1,15 @@
 package com.example.zone.ModelClasses
 
-class Chat {
-    private var sender: String = ""
-    private var message: String = ""
-    private var receiver: String = ""
-    private var isseen = false
-    private var url: String = ""
-    private var messageId: String = ""
+class Chat(
+    private var sender: String,
+    private var message: String,
+    private var receiver: String,
+    private var isseen: Boolean,
+    private var url: String,
+    private var messageId: String
+) {
 
-    constructor(
-        sender: String,
-        message: String,
-        receiver: String,
-        isseen: Boolean,
-        url: String,
-        messageId: String
-    ) {
-        this.sender = sender
-        this.message = message
-        this.receiver = receiver
-        this.isseen = isseen
-        this.url = url
-        this.messageId = messageId
-    }
-    fun getSender(): String?{
+    fun getSender(): String {
         return sender
     }
 
@@ -31,7 +17,7 @@ class Chat {
         this.sender = sender
     }
 
-    fun getMessage(): String? {
+    fun getMessage(): String {
         return message
     }
 
@@ -39,7 +25,7 @@ class Chat {
         this.message = message
     }
 
-    fun getReceiver(): String? {
+    fun getReceiver(): String {
         return receiver
     }
 
@@ -47,7 +33,7 @@ class Chat {
         this.receiver = receiver
     }
 
-    fun getIsSeen(): Boolean? {
+    fun getIsSeen(): Boolean {
         return isseen
     }
 
@@ -55,7 +41,7 @@ class Chat {
         this.isseen = isseen
     }
 
-    fun getUrl(): String? {
+    fun getUrl(): String {
         return url
     }
 
@@ -63,7 +49,7 @@ class Chat {
         this.url = url
     }
 
-    fun getMessageId(): String? {
+    fun getMessageId(): String {
         return messageId
     }
 

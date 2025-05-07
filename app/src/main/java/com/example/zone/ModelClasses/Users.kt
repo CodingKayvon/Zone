@@ -1,27 +1,14 @@
 package com.example.zone.ModelClasses
 
-class Users {
-    private var uid: String = ""
-    private var username: String = ""
-    private var profile: String = ""
-    private var status: String = ""
-    private var description: String = ""
+class Users(
+    private var uid: String,
+    private var username: String,
+    private var profile: String,
+    private var status: String,
+    private var description: String
+) {
 
-    constructor(
-        uid: String,
-        username: String,
-        profile: String,
-        status: String,
-        description: String
-    ) {
-        this.uid = uid
-        this.username = username
-        this.profile = profile
-        this.status = status
-        this.description = description
-    }
-
-    fun getUID(): String?{
+    fun getUID(): String {
         return uid
     }
 
@@ -29,7 +16,7 @@ class Users {
         this.uid = uid
     }
 
-    fun getUserName(): String? {
+    fun getUserName(): String {
         return username
     }
 
@@ -37,7 +24,7 @@ class Users {
         this.username = username
     }
 
-    fun getProfile(): String?{
+    fun getProfile(): String {
         return profile
     }
 
@@ -45,7 +32,7 @@ class Users {
         this.profile = profile
     }
 
-    fun getStatus(): String?{
+    fun getStatus(): String {
         return status
     }
 
@@ -53,7 +40,7 @@ class Users {
         this.status = status
     }
 
-    fun getDescription(): String?{
+    fun getDescription(): String {
         return description
     }
 
