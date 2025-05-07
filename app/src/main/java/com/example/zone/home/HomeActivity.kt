@@ -16,6 +16,8 @@ class HomeActivity : AppCompatActivity() {
         loadFragment(profileFragment())
 
         // Set up bottom navigation
+
+
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
         bottomNav.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
