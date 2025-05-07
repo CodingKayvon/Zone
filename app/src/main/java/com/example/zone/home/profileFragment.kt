@@ -15,7 +15,7 @@ import com.google.firebase.database.FirebaseDatabase
 
 class profileFragment : Fragment() {
 
-    //private lateinit var auth: FirebaseAuth
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -23,22 +23,21 @@ class profileFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
-        //auth = FirebaseAuth.getInstance()
-        //val user = auth.currentUser
-        //val uid = user?.uid
-        //val database = FirebaseDatabase.getInstance().reference
+        auth = FirebaseAuth.getInstance()
+        val user = auth.currentUser
+        val uid = user?.uid
+        val database = FirebaseDatabase.getInstance().reference
 
-        //val emailTextView = view.findViewById<TextView>(R.id.profileEmail)
-        //val displayNameInput = view.findViewById<EditText>(R.id.displayNameInput)
-        //val aboutMeInput = view.findViewById<EditText>(R.id.aboutMeInput)
-        //val saveButton = view.findViewById<Button>(R.id.saveProfileButton)
-        //val logoutButton = view.findViewById<Button>(R.id.logoutButton)
-        //val deleteButton = view.findViewById<Button>(R.id.deleteAccountButton)
+        val emailTextView = view.findViewById<TextView>(R.id.profileEmail)
+        val displayNameInput = view.findViewById<EditText>(R.id.displayNameInput)
+        val aboutMeInput = view.findViewById<EditText>(R.id.aboutMeInput)
+        val saveButton = view.findViewById<Button>(R.id.saveProfileButton)
+        val logoutButton = view.findViewById<Button>(R.id.logoutButton)
+        val deleteButton = view.findViewById<Button>(R.id.deleteAccountButton)
 
-        //emailTextView.text = "Email: ${user?.email ?: "Not logged in"}"
+        emailTextView.text = "Email: ${user?.email ?: "Not logged in"}"
 
         // Load existing profile info
-        /*
         uid?.let {
             database.child("users").child(it).get().addOnSuccessListener { snapshot ->
                 displayNameInput.setText(snapshot.child("displayName").value?.toString() ?: "")
@@ -102,10 +101,5 @@ class profileFragment : Fragment() {
                     Toast.makeText(requireContext(), "Failed to delete account: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
-           }
-         */
-        return view
     }
-
-
 }

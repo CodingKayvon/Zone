@@ -17,7 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 class SignUpActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
+    //private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +25,7 @@ class SignUpActivity : AppCompatActivity() {
         setContentView(R.layout.activity_sign_up)
 
         //Firebase Auth
-        db = FirebaseFirestore.getInstance()
+        //db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
 
         //Connecting designs
@@ -61,6 +61,9 @@ class SignUpActivity : AppCompatActivity() {
                     val userId = authResult.user?.uid ?:return@addOnSuccessListener
 
                     //User Data
+                    val user: MutableMap<String, Any> = HashMap()
+                    user["email"] = email
+                    user["Password"] = password
                     Toast.makeText(this, "Sign-up Successful", Toast.LENGTH_SHORT).show()
 
                     val userdata: MutableMap<String, Any> = HashMap()
@@ -77,18 +80,13 @@ class SignUpActivity : AppCompatActivity() {
                         .addOnCompleteListener{ task ->
                             if (task.isSuccessful)
                             {
-                                Log.d("dbFirebase", "User data saved for ID: ${userId}")
-                                val intent = Intent(this@SignUpActivity, SignInActivity::class.java)
+                               // val intent = Intent(this@SignUpActivity, SignInActivity::class.java)
                                 Toast.makeText(this, "Sign-up Successful", Toast.LENGTH_SHORT).show()
-                                startActivity(intent)
-                                finish()
-                            }
-                            else
-                            {
-                                Log.w("dbFirebase", "Failed to save user data")
+                                //startActivity(intent)
+                                //finish()
                             }
                         }
-/*
+                    /*
                     db.collection("users").document(userId)
                         .set(userdata)
                         .addOnSuccessListener {
@@ -101,9 +99,7 @@ class SignUpActivity : AppCompatActivity() {
                             Toast.makeText(this, "Failed to save data: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
 
- */
-
-
+                     */
                 }
                 .addOnFailureListener { e ->
                     Log.w("dbFirebase", "Sign-up Failed", e)
