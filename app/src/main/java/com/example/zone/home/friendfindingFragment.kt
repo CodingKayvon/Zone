@@ -69,18 +69,6 @@ class friendfindingFragment : Fragment() {
         val firebaseUserID = FirebaseAuth.getInstance().currentUser?.uid
         val refUsersFireStore = FirebaseFirestore.getInstance().collection("users")
 
-        val refUsers = FirebaseDatabase.getInstance().reference
-
-        refUsers.child("users")
-            .addValueEventListener(object: ValueEventListener{
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    TODO("Not yet implemented")
-                }
-            })
 
         refUsersFireStore.get()
             .addOnSuccessListener { documentSnapshot ->
