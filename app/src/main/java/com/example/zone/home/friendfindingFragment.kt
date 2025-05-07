@@ -95,10 +95,13 @@ class friendfindingFragment : Fragment() {
         refUsers.addValueEventListener(object: ValueEventListener {
             override fun onDataChange(p0: DataSnapshot) {
                 (mUsers as ArrayList<Users>).clear()
-                for (snapshot in p0.children) {
-                    val user: Users? = p0.getValue(Users::class.java)
-                    if (!(user!!.getUID()).equals(firebaseUserID)) {
-                        (mUsers as ArrayList<Users>).add(user)
+                if (searchEditText!!.text.toString() == "")
+                {
+                    for (snapshot in p0.children) {
+                        val user: Users? = snapshot.getValue(Users::class.java)
+                        if (!(user!!.getUID()).equals(firebaseUserID)) {
+                            (mUsers as ArrayList<Users>).add(user)
+                        }
                     }
                 }
                 userAdapter = UserAdapter(context!!, mUsers!!, false)
@@ -122,7 +125,7 @@ class friendfindingFragment : Fragment() {
             override fun onDataChange(p0: DataSnapshot) {
                 (mUsers as ArrayList<Users>).clear()
                 for (snapshot in p0.children) {
-                    val user: Users? = p0.getValue(Users::class.java)
+                    val user: Users? = snapshot.getValue(Users::class.java)
                     if (!(user!!.getUID()).equals(firebaseUserID)) {
                         (mUsers as ArrayList<Users>).add(user)
                     }
