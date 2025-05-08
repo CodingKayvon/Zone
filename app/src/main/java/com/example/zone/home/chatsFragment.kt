@@ -11,11 +11,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.zone.AdapterClasses.UserAdapter
 import com.example.zone.ModelClasses.Chatlist
 import com.example.zone.ModelClasses.Users
+import com.example.zone.Notifications.Token
 import com.example.zone.R
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
+import com.google.firebase.messaging.FirebaseMessaging
 
 class chatsFragment : Fragment() {
     private var userAdapter: UserAdapter? = null
@@ -62,10 +66,30 @@ class chatsFragment : Fragment() {
                     retrieveChatLists()
                 }
             }
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if(!task.isSuccessful)
+            {
+                Log.w("FCM", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
 
+            val refreshToken = task.result
+            if (firebaseUser != null)
+            {
+                updateToken(refreshToken)
+            }
+        })
         return view
 
     }
+
+    private fun updateToken(token: String?) {
+        val ref = FirebaseFirestore.getInstance().collection("Tokens")
+        val token1 = Token(token!!)
+        ref.document(firebaseUser!!.uid).set(token1)
+    }
+
+
     private fun retrieveChatLists(){
         mUsers = ArrayList()
         val refFireStore = FirebaseFirestore.getInstance().collection("users")

@@ -22,6 +22,11 @@ import com.example.zone.AdapterClasses.ChatsAdapter
 import com.example.zone.ModelClasses.Chat
 import com.example.zone.ModelClasses.Chatlist
 import com.example.zone.ModelClasses.Users
+import com.example.zone.Notifications.Client
+import com.example.zone.Notifications.Data
+import com.example.zone.Notifications.MyResponse
+import com.example.zone.Notifications.Sender
+import com.example.zone.Notifications.Token
 import com.example.zone.R
 import com.example.zone.home.HomeActivity
 import com.google.android.gms.tasks.OnCompleteListener
@@ -44,6 +49,9 @@ import com.google.firebase.storage.StorageTask
 import com.google.firebase.storage.UploadTask
 import com.google.firestore.v1.Value
 import com.squareup.picasso.Picasso
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import kotlin.coroutines.Continuation
 
 class ChatRoomActivity : AppCompatActivity() {
@@ -53,6 +61,9 @@ class ChatRoomActivity : AppCompatActivity() {
     var mChatList: List<Chat>? = null
     lateinit var recycler_view_chats: RecyclerView
     lateinit var userNameText: TextView
+
+    var notify = false
+    var apiService: APIService? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +82,8 @@ class ChatRoomActivity : AppCompatActivity() {
             finish()
         }
 
+
+        apiService = Client.Client.getClient("https://fcm.googleapis.com/").create(APIService::class.java)
         intent = intent
         userIdVisit = intent.getStringExtra("visit_id")!!
         firebaseUser =  FirebaseAuth.getInstance().currentUser
@@ -115,6 +128,7 @@ class ChatRoomActivity : AppCompatActivity() {
         val textBox = findViewById<EditText>(R.id.text_message)
 
         sendButton.setOnClickListener() {
+            notify = true
             val message = textBox.text.toString()
             if (message =="") {
                 Toast.makeText(this@ChatRoomActivity, "Please write a message first...", Toast.LENGTH_LONG).show()
@@ -128,6 +142,7 @@ class ChatRoomActivity : AppCompatActivity() {
         /* WILL NOT WORK WITHOUT PURCHASED FIREBASE STORAGE
         val attatch_image_file_btn = findViewById<Button>(R.id.attatch_image_file_btn)
         attatch_image_file_btn.setOnClickListener {
+            notify = true
             val intent = Intent()
             intent.action = Intent.ACTION_GET_CONTENT
             intent.type = "image/"
@@ -144,8 +159,8 @@ class ChatRoomActivity : AppCompatActivity() {
      **************************************************************************************/
     private fun sendMessageToUser(senderId: String, receiverId: String, message: String) {
         val referenceFirestore = FirebaseFirestore.getInstance()
-
         val messageHashMap = HashMap<String, Any?>()
+
         messageHashMap["sender"] = senderId
         messageHashMap["message"] = message
         messageHashMap["receiver"] = receiverId
@@ -198,13 +213,86 @@ class ChatRoomActivity : AppCompatActivity() {
                     .collection("chats")
                     .document(document.id)
                     .update("messageId", messageHashMap["messageId"])
+
+
+            }
+        /*************************************************************************************
+         * NEW LISTENER PLEASE DEBUG
+         */
+
+        val reference = FirebaseFirestore.getInstance().collection("users").document(firebaseUser!!.uid)
+        reference.addSnapshotListener{snapshot, e->
+            if(e != null)
+            {
+                Log.w("FCM NOTIF PUSH", e)
+            }
+            else if (snapshot != null)
+            {
+                val user = snapshot.toObject<Users>()
+                if (notify)
+                {
+                    sendNotification(receiverId, user!!.username, message)
+                }
+                notify = false
+            }
+            else
+            {
+                Log.w("FCM NOTIF PUSH", "UNEXPECTED ERROR")
             }
 
-
-
-
+        }
                     //add notifs
     }
+
+    /*************************************************************************************
+     * NEW FUNCTION PLEASE DEBUG
+     */
+    private fun sendNotification(receiverId: String, username: String?, message: String) {
+        val ref = FirebaseFirestore.getInstance().collection("Tokens")
+
+        val query = ref.addSnapshotListener{snapshot, e->
+            if (e != null)
+            {
+                Log.w("FCM NOTIF PUSH", e)
+            }
+            else if (snapshot != null)
+            {
+                for (item in snapshot)
+                {
+                    val token: Token? = item.toObject<Token>()
+
+                    val data = Data(firebaseUser!!.uid,
+                        R.mipmap.ic_launcher_round,
+                        "$username: $message",
+                        "New Message",
+                        userIdVisit)
+
+                    val sender = Sender(data, token!!.token.toString())
+
+                    apiService!!.sendNotification(sender)
+                        .enqueue(object: Callback<MyResponse>{
+                            override fun onResponse(
+                                p0: Call<MyResponse>,
+                                p1: Response<MyResponse>
+                            ) {
+                                if (p1.code() == 200)
+                                {
+                                    if (p1.body()!!.success !==1)
+                                    {
+                                        Log.w("FCM SEND NOTIF", "FAILED")
+                                    }
+                                }
+                            }
+
+                            override fun onFailure(p0: Call<MyResponse>, p1: Throwable) {
+                                Log.w("FCM SEND NOTIF", "FAILED FAILED")
+                            }
+                        })
+                }
+            }
+        }
+    }
+
     private fun retriveMessages(senderId: String, receiverId: String?)
     {
         mChatList = ArrayList()
@@ -272,6 +360,7 @@ class ChatRoomActivity : AppCompatActivity() {
                     messageHashMap["messageId"] = messageId
 
                     ref.child("chats").child(messageId!!).setValue(messageHashMap)
+
                 }
             }
 
