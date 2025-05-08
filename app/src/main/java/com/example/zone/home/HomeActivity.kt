@@ -5,8 +5,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.zone.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 
 class HomeActivity : AppCompatActivity() {
+
+    private val auth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
+    private val currentUser = auth.currentUser
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +33,20 @@ class HomeActivity : AppCompatActivity() {
                 else -> false
             }
         }
+
+        setUserStatus("online")
     }
+
+    override fun onStop(){
+        super.onStop()
+        setUserStatus("offline")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        setUserStatus("offline")
+    }
+
 
     // Helper function to load a fragment
     private fun loadFragment(fragment: Fragment): Boolean {
@@ -34,5 +54,12 @@ class HomeActivity : AppCompatActivity() {
             .replace(R.id.fragmentContainerView, fragment)
             .commit()
         return true
+    }
+
+    private fun setUserStatus(status: String){
+        currentUser?.uid?.let { uid ->
+            firestore.collection("users").document(uid)
+                .update("status", status)
+        }
     }
 }
