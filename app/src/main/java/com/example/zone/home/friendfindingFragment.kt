@@ -87,10 +87,14 @@ class friendfindingFragment : Fragment() {
                         }
 
                     }
-                Log.d("RETRIEVE", "7")
-                userAdapter = UserAdapter(requireContext(), mUsers!!, false)
-                Log.d("RETRIEVE", "8")
-                recyclerView?.adapter = userAdapter
+                val ctx = context
+                if ((mUsers as ArrayList<Users>).isNotEmpty() && ctx != null)
+                {
+                    Log.d("RETRIEVE", "7")
+                    userAdapter = UserAdapter(ctx, mUsers!!, false)
+                    Log.d("RETRIEVE", "8")
+                    recyclerView?.adapter = userAdapter
+                }
             }
 
     }
