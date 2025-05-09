@@ -17,6 +17,7 @@
     </item>
     <item
         android:id="@+id/nav_friends"
-        android:title="Friends" >
+        android:title="Friends"
+        android:icon="@drawable/baseline_3p_24">
     </item>
 </menu>

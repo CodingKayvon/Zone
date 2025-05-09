@@ -9,7 +9,6 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import com.example.zone.R
 import com.example.zone.login.SignInActivity
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
@@ -33,7 +32,6 @@ class profileFragment : Fragment() {
         val aboutMeInput = view.findViewById<EditText>(R.id.aboutMeInput)
         val saveButton = view.findViewById<Button>(R.id.saveProfileButton)
         val logoutButton = view.findViewById<Button>(R.id.logoutButton)
-        val deleteButton = view.findViewById<Button>(R.id.deleteAccountButton)
 
         emailTextView.text = "Email: ${user?.email ?: "Not logged in"}"
 
@@ -72,34 +70,6 @@ class profileFragment : Fragment() {
             requireActivity().finish()
         }
 
-        deleteButton.setOnClickListener {
-            showDeleteConfirmationDialog()
-        }
-
         return view
-    }
-
-    private fun showDeleteConfirmationDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Delete Account")
-            .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
-            .setPositiveButton("Yes, Delete") { _, _ -> deleteAccount() }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun deleteAccount() {
-        val user = auth.currentUser
-        user?.delete()
-            ?.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(requireContext(), "Account deleted", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(requireContext(), SignInActivity::class.java)
-                    startActivity(intent)
-                    requireActivity().finish()
-                } else {
-                    Toast.makeText(requireContext(), "Failed to delete account: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                }
-            }
     }
 }
