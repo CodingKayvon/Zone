@@ -25,6 +25,7 @@ import com.example.zone.ModelClasses.Users
 import com.example.zone.Notifications.Client
 import com.example.zone.Notifications.Data
 import com.example.zone.Notifications.MyResponse
+import com.example.zone.Notifications.NotificationBody
 import com.example.zone.Notifications.Sender
 import com.example.zone.Notifications.Token
 import com.example.zone.R
@@ -82,11 +83,9 @@ class ChatRoomActivity : AppCompatActivity() {
             finish()
         }
 
-
         apiService = Client.Client.getClient("https://fcm.googleapis.com/").create(APIService::class.java)
-        intent = intent
         userIdVisit = intent.getStringExtra("visit_id")!!
-        firebaseUser =  FirebaseAuth.getInstance().currentUser
+        firebaseUser = FirebaseAuth.getInstance().currentUser
         userNameText = findViewById(R.id.username_mc)
 
         recycler_view_chats = findViewById(R.id.recycler_view_chats)
@@ -97,18 +96,13 @@ class ChatRoomActivity : AppCompatActivity() {
 
         val reference = FirebaseFirestore.getInstance().collection("users").document(userIdVisit)
 
-        reference.addSnapshotListener{ snapshot, e->
-            if (e != null)
-            {
+        reference.addSnapshotListener { snapshot, e ->
+            if (e != null) {
                 Log.d("Listener", "FAILED")
-            }
-            else
-            {
-
+            } else {
                 reference.get()
                     .addOnSuccessListener { document ->
-                        if (document != null)
-                        {
+                        if (document != null) {
                             val user = document.toObject<Users>()
                             userNameText.text = user!!.username
                             retriveMessages(firebaseUser!!.uid, userIdVisit)
@@ -117,46 +111,36 @@ class ChatRoomActivity : AppCompatActivity() {
             }
         }
 
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        FirebaseFirestore.getInstance().collection("chats")
+            .whereIn("receiver", listOf(firebaseUser!!.uid, userIdVisit))
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w("LIVE UPDATE", e)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    retriveMessages(firebaseUser!!.uid, userIdVisit)
+                }
+            }
 
         val sendButton = findViewById<Button>(R.id.send_message_button)
         val textBox = findViewById<EditText>(R.id.text_message)
 
-        sendButton.setOnClickListener() {
+        sendButton.setOnClickListener {
             notify = true
             val message = textBox.text.toString()
-            if (message =="") {
+            if (message == "") {
                 Toast.makeText(this@ChatRoomActivity, "Please write a message first...", Toast.LENGTH_LONG).show()
-            }
-            else {
+            } else {
                 sendMessageToUser(firebaseUser!!.uid, userIdVisit, message)
                 retriveMessages(firebaseUser!!.uid, userIdVisit)
             }
             textBox.setText("")
         }
-        /* WILL NOT WORK WITHOUT PURCHASED FIREBASE STORAGE
-        val attatch_image_file_btn = findViewById<Button>(R.id.attatch_image_file_btn)
-        attatch_image_file_btn.setOnClickListener {
-            notify = true
-            val intent = Intent()
-            intent.action = Intent.ACTION_GET_CONTENT
-            intent.type = "image/"
-            startActivityForResult(Intent.createChooser(intent,"Pick Image"), 438)
-        }
-
-         */
 
         seenMessage(userIdVisit)
     }
 
-    /**************************************************************************************
-     * creates a message data fragment to send to database                                *
-     **************************************************************************************/
     private fun sendMessageToUser(senderId: String, receiverId: String, message: String) {
         val referenceFirestore = FirebaseFirestore.getInstance()
         val messageHashMap = HashMap<String, Any?>()
@@ -168,117 +152,61 @@ class ChatRoomActivity : AppCompatActivity() {
         messageHashMap["url"] = ""
         messageHashMap["messageId"] = "-1"
         messageHashMap["createdAt"] = FieldValue.serverTimestamp()
+
         referenceFirestore.collection("chats")
             .add(messageHashMap)
             .addOnSuccessListener { document ->
+                messageHashMap["messageId"] = document.id
+                referenceFirestore.collection("chats")
+                    .document(document.id)
+                    .update("messageId", messageHashMap["messageId"])
 
                 val chatlistHash = HashMap<String, Any?>()
 
-                //create chatlist item for sender if it doesnt already exist
                 val chatListReference = FirebaseFirestore.getInstance()
                 var chatFound = false
                 chatListReference.collection("chatlist")
                     .get()
                     .addOnSuccessListener { documents ->
-                        for (snapshot in documents)
-                        {
+                        for (snapshot in documents) {
                             val chatListItem = snapshot.toObject<Chatlist>()
-                            if (chatListItem.sender == senderId && chatListItem.receiver == receiverId || chatListItem.receiver == senderId && chatListItem.sender == receiverId)
-                            {
+                            if (chatListItem.sender == senderId && chatListItem.receiver == receiverId || chatListItem.receiver == senderId && chatListItem.sender == receiverId) {
                                 chatFound = true
                             }
                         }
-                        if (!chatFound)
-                        {
+                        if (!chatFound) {
                             chatlistHash["receiver"] = receiverId
                             chatlistHash["sender"] = senderId
-                            chatListReference
-                                .collection("chatlist")
+                            chatListReference.collection("chatlist")
                                 .document()
                                 .set(chatlistHash)
-
-                            //Create chatlist for receiver if it doesnt already exist
                             chatlistHash["receiver"] = senderId
                             chatlistHash["sender"] = receiverId
-                            chatListReference
-                                .collection("chatlist")
+                            chatListReference.collection("chatlist")
                                 .document(receiverId)
                                 .set(chatlistHash)
-
                         }
                     }
 
-                messageHashMap["messageId"] = document.id
-                referenceFirestore
-                    .collection("chats")
-                    .document(document.id)
-                    .update("messageId", messageHashMap["messageId"])
-
-
+                sendNotification(receiverId, firebaseUser!!.uid, message)
             }
-        /*************************************************************************************
-         * NEW LISTENER PLEASE DEBUG
-         */
-
-        val reference = FirebaseFirestore.getInstance().collection("users").document(firebaseUser!!.uid)
-        reference.addSnapshotListener{snapshot, e->
-            if(e != null)
-            {
-                Log.w("FCM NOTIF PUSH", e)
-            }
-            else if (snapshot != null)
-            {
-                val user = snapshot.toObject<Users>()
-                if (notify)
-                {
-                    sendNotification(receiverId, user!!.username, message)
-                }
-                notify = false
-            }
-            else
-            {
-                Log.w("FCM NOTIF PUSH", "UNEXPECTED ERROR")
-            }
-
-        }
-                    //add notifs
     }
 
-    /*************************************************************************************
-     * NEW FUNCTION PLEASE DEBUG
-     */
-    private fun sendNotification(receiverId: String, username: String?, message: String) {
+    private fun sendNotification(receiverId: String, senderId: String, message: String) {
         val ref = FirebaseFirestore.getInstance().collection("Tokens")
 
-        val query = ref.addSnapshotListener{snapshot, e->
-            if (e != null)
-            {
-                Log.w("FCM NOTIF PUSH", e)
-            }
-            else if (snapshot != null)
-            {
-                for (item in snapshot)
-                {
+        ref.get().addOnSuccessListener { snapshot ->
+            if (snapshot != null) {
+                for (item in snapshot) {
                     val token: Token? = item.toObject<Token>()
-
-                    val data = Data(firebaseUser!!.uid,
-                        R.mipmap.ic_launcher_round,
-                        "$username: $message",
-                        "New Message",
-                        userIdVisit)
-
-                    val sender = Sender(data, token!!.token.toString())
+                    val data = Data(senderId, R.mipmap.ic_launcher_round, "$senderId: $message", "New Message", receiverId)
+                    val sender = Sender(data, token!!.token.toString(), NotificationBody("New Message", "$senderId: $message"))
 
                     apiService!!.sendNotification(sender)
-                        .enqueue(object: Callback<MyResponse>{
-                            override fun onResponse(
-                                p0: Call<MyResponse>,
-                                p1: Response<MyResponse>
-                            ) {
-                                if (p1.code() == 200)
-                                {
-                                    if (p1.body()!!.success !==1)
-                                    {
+                        .enqueue(object : Callback<MyResponse> {
+                            override fun onResponse(p0: Call<MyResponse>, p1: Response<MyResponse>) {
+                                if (p1.code() == 200) {
+                                    if (p1.body()!!.success != 1) {
                                         Log.w("FCM SEND NOTIF", "FAILED")
                                     }
                                 }
@@ -293,24 +221,18 @@ class ChatRoomActivity : AppCompatActivity() {
         }
     }
 
-    private fun retriveMessages(senderId: String, receiverId: String?)
-    {
+    private fun retriveMessages(senderId: String, receiverId: String?) {
         mChatList = ArrayList()
         val referenceFirestore = FirebaseFirestore.getInstance().collection("chats").orderBy("createdAt", Query.Direction.ASCENDING)
 
-        referenceFirestore
-            .get()
+        referenceFirestore.get()
             .addOnSuccessListener { documents ->
                 (mChatList as ArrayList<Chat>).clear()
-                for (snapshot in documents)
-                {
+                for (snapshot in documents) {
                     val chat = snapshot.toObject<Chat>()
-                    if (chat.receiver.equals(senderId) && chat.sender.equals(receiverId))
-                    {
+                    if (chat.receiver.equals(senderId) && chat.sender.equals(receiverId)) {
                         (mChatList as ArrayList<Chat>).add(chat)
-                    }
-                    else if (chat.receiver.equals(receiverId) && chat.sender.equals(senderId))
-                    {
+                    } else if (chat.receiver.equals(receiverId) && chat.sender.equals(senderId)) {
                         (mChatList as ArrayList<Chat>).add(chat)
                     }
                 }
@@ -319,73 +241,20 @@ class ChatRoomActivity : AppCompatActivity() {
             }
         seenMessage(userIdVisit)
     }
-/* WONT WORK WITHOUT FIREBASE STORAGE PURCHASE
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 438 && resultCode == RESULT_OK && data!=null && data!!.data!=null)
-        {
-            val loadingBar = ProgressDialog(this)
-            loadingBar.setMessage("Please wait, image is sending...")
-            loadingBar.show()
 
-            val fileUri = data.data
-            val storageReference = FirebaseStorage.getInstance().reference.child("Chat Images")
-            val ref = FirebaseDatabase.getInstance().reference
-            val messageId = ref.push().key
-            val filePath = storageReference.child("$messageId.jpg")
-
-            var uploadTask: StorageTask<*>
-            uploadTask = storageReference.putFile(fileUri!!)
-
-            uploadTask.continueWithTask<Uri?>(com.google.android.gms.tasks.Continuation <UploadTask.TaskSnapshot, Task<Uri>>{ task ->
-                if (!task.isSuccessful)
-                {
-                    task.exception?.let {
-                        throw it
+    private fun seenMessage(userId: String) {
+        val referenceFirestore = FirebaseFirestore.getInstance().collection("chats")
+        referenceFirestore.get()
+            .addOnSuccessListener { documents ->
+                for (snapshot in documents) {
+                    val chat = snapshot.toObject<Chat>()
+                    if (chat.receiver == firebaseUser!!.uid && chat.receiver == userId) {
+                        FirebaseFirestore.getInstance()
+                            .collection("chats")
+                            .document(snapshot.id)
+                            .update("isseen", true)
                     }
-                }
-                return@Continuation filePath.downloadUrl
-            }).addOnCompleteListener {task ->
-                if (task.isSuccessful)
-                {
-                    val downloadUrl = task.result
-                    val url = downloadUrl.toString()
-
-                    val messageHashMap = HashMap<String, Any?>()
-                    messageHashMap["sender"] = firebaseUser!!.uid
-                    messageHashMap["message"] = "sent you an image."
-                    messageHashMap["receiver"] = userIdVisit
-                    messageHashMap["isseen"] = false
-                    messageHashMap["url"] = url
-                    messageHashMap["messageId"] = messageId
-
-                    ref.child("chats").child(messageId!!).setValue(messageHashMap)
-
                 }
             }
-
-        }
     }
-    */
-    private fun seenMessage(userId: String)
-    {
-        val referenceFirestore = FirebaseFirestore.getInstance().collection("chats")
-            referenceFirestore.get()
-                .addOnSuccessListener { documents ->
-                    for (snapshot in documents)
-                    {
-                        val chat = snapshot.toObject<Chat>()
-
-                        if (chat.receiver == firebaseUser!!.uid && chat.receiver == userId)
-                        {
-                            FirebaseFirestore.getInstance()
-                                .collection("chats")
-                                .document(snapshot.id)
-                                .update("isseen", true)
-                        }
-                    }
-                }
-
-    }
-
 }

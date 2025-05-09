@@ -1,6 +1,6 @@
 package com.example.zone.Notifications
 
-import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -10,80 +10,86 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.example.zone.R
 import com.example.zone.chatroom.ChatRoomActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 class MyFirebaseMessaging : FirebaseMessagingService() {
+
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        val sent = message.data["sent"]
+        val data = message.data
 
-        val user = message.data["uesr"]
+        val senderId = data["sent"] ?: return
+        val receiverId = data["user"] ?: return
+        val title = data["title"] ?: "New Message"
+        val body = data["body"] ?: ""
+        val iconRes = R.drawable.zone_logo // Replace with your actual icon resource
 
+        val currentUser = FirebaseAuth.getInstance().currentUser?.uid
         val sharedPref = getSharedPreferences("PREFS", Context.MODE_PRIVATE)
+        val currentChatUser = sharedPref.getString("currentUser", "none")
 
-        val currentOnlineUser = sharedPref.getString("currentUser", "none")
-
-        val firebaseUser = FirebaseAuth.getInstance().currentUser
-
-        if (firebaseUser != null && sent == firebaseUser.uid)
-        {
-            if (currentOnlineUser != user)
-            {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                {
-                    sendOreoNotification(message)
-                }
-                else
-                {
-                    Log.d("VERSION", "OLD")
-                }
-            }
+        // Only notify if this user is the receiver, and they are not currently chatting with the sender
+        if (currentUser != null && receiverId == currentUser && currentChatUser != senderId) {
+            showNotification(senderId, title, body, iconRes)
         }
     }
-    private fun sendOreoNotification(message: RemoteMessage)
-    {
-        val user = message.data["user"]
-        val icon = message.data["icon"]
-        val title = message.data["title"]
-        val body = message.data["body"]
 
-        val notification = message.notification
-        val j = user!!.replace("[\\D]".toRegex(), "").toInt()
-        val intent = Intent(this, ChatRoomActivity::class.java)
-        val bundle = Bundle()
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
 
-        bundle.putString("userid",user)
-        intent.putExtras(bundle)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        Log.d("FCM", "New token: $token")
 
-        val pendingIntent = PendingIntent.getActivity(this, j, intent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
+        // Optional: Save token to Firestore or your server
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+        firebaseUser?.uid?.let { uid ->
+            val tokensRef = FirebaseFirestore.getInstance().collection("Tokens")
+            val tokenMap = hashMapOf("token" to token)
+            tokensRef.document(uid).set(tokenMap)
+        }
+    }
 
-        val defaultSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+    private fun showNotification(senderId: String, title: String, body: String, iconRes: Int) {
+        val channelId = "chat_notifications"
+        val channelName = "Chat Notifications"
 
-        val oreoNotification = OreoNotification(this)
+        val intent = Intent(this, ChatRoomActivity::class.java).apply {
+            putExtra("userid", senderId)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
 
-        val builder: NotificationCompat.Builder = NotificationCompat.Builder(this)
-            .setSmallIcon(icon!!.toInt())
+        val requestCode = senderId.replace(Regex("\\D"), "").toIntOrNull() ?: 0
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(iconRes)
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)
-            .setSound(defaultSound)
+            .setSound(soundUri)
+            .setContentIntent(pendingIntent)
 
-        val noti = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-
-        var i = 0
-        if (j > 0)
-        {
-            i = j
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "Channel for chat notifications"
+            }
+            notificationManager.createNotificationChannel(channel)
         }
 
-        oreoNotification.getManager!!.notify(i, builder.build())
-
+        notificationManager.notify(requestCode, notificationBuilder.build())
     }
 }
